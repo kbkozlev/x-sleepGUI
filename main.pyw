@@ -2,33 +2,36 @@ import random
 import PySimpleGUI as sg
 import pyautogui as pag
 import multiprocess as mp
+import threading
 from background_process import process
 from timer import countdown
 
 
-def create_process(target, *kwargs):
-    return mp.Process(target=target, args=kwargs)
+def create_process(args, *kwargs):
+    return mp.Process(target=args, args=kwargs)
 
 
 def main_window():
     layout = [[sg.Frame('Hotkey',
                         [[sg.I(disabled=True, default_text='CTRL + ALT + C', justification='c',
-                               disabled_readonly_text_color='grey', disabled_readonly_background_color='#dae0e6', key='-INP-')],
+                               disabled_readonly_text_color='grey', disabled_readonly_background_color='#dae0e6',
+                               key='-INP-')],
                          [sg.Radio('Default', 'sel', default=True, enable_events=True, key='-DEF-'),
                           sg.Radio('Custom', 'sel', enable_events=True, key='-CUST-'), sg.Push(),
                           sg.B('Apply', size=8, disabled=True, disabled_button_color='light grey', key='-APP_HT-')]
                          ], expand_x=True)],
               [sg.Frame('Timer',
                         [[sg.T('Hours:'), sg.DropDown(HOURS, default_value=0, key='-H-', disabled=True,
-                                                      button_background_color='#93b7a6'),
+                                                      readonly=True, button_background_color='#93b7a6'),
                           sg.T('Minutes:'), sg.DropDown(MINUTES, default_value=0, key='-M-', disabled=True,
-                                                        button_background_color='#93b7a6'),
+                                                        readonly=True, button_background_color='#93b7a6'),
                           sg.T('Seconds:'), sg.DropDown(SECONDS, default_value=0, key='-S-', disabled=True,
-                                                        button_background_color='#93b7a6')
+                                                        readonly=True, button_background_color='#93b7a6')
                           ],
                          [sg.Radio('Off', 'timer', default=True, enable_events=True, key='-OFF-'),
                           sg.Radio('On', 'timer', enable_events=True, key='-ON-'), sg.Push(),
-                          sg.B('Apply', size=8, disabled=True, disabled_button_color='light grey', key='-APP_TM-')],
+                          sg.I(background_color='#dae0e6', size=8, key='-LOG_TIME-', justification='c', disabled=False,
+                               disabled_readonly_background_color='#dae0e6', readonly=True)]
                          ], expand_x=True)],
               [sg.Frame('Log',
                         [[sg.I(background_color='#dae0e6', size=45, key='-LOG-')]], expand_x=True)],
@@ -39,35 +42,27 @@ def main_window():
     window = sg.Window("X-sleep", layout)
 
     while True:
-        event, values = window.read()
+        event, values = window.read(timeout=1)
 
         if event in ('Exit', sg.WIN_CLOSED):
             break
 
         if event == 'Start':
-            bgp = create_process(process, [pag, random])
+            bgp = create_process(process, pag, random)
             bgp.daemon = True
-            # bgp.start()
+            bgp.start()
 
             if values['-ON-']:
-                time_left = create_process(countdown, [1, 0, 0])
-                time_left.daemon = True
-                while True:
-                    time_left.start()
-                    window['-LOG-'].update(str(time_left))
-                    # window.refresh()
-                    if time_left == "00:00:00":
-                        break
-
+                active = True
+                t1 = threading.Thread(target=countdown, args=(values['-H-'], values['-M-'], values['-S-'],
+                                                              lambda: active, window), daemon=True).start()
 
         if event == 'Stop':
+            active = False
             try:
                 bgp.terminate()
-                time_left.terminate()
-
-
-            except UnboundLocalError:
-                print('Process not running')
+            except Exception as e:
+                print(e)
 
         # Events for Frame - Hotkey
         if event == '-DEF-':
@@ -86,17 +81,11 @@ def main_window():
             window['-H-'].update(disabled=False)
             window['-M-'].update(disabled=False)
             window['-S-'].update(disabled=False)
-            window['-APP_TM-'].update(disabled=False)
-            window['-APP_TM-'].update(button_color='#93b7a6')
-
 
         elif event == '-OFF-':
             window['-H-'].update(disabled=True)
             window['-M-'].update(disabled=True)
             window['-S-'].update(disabled=True)
-            window['-APP_TM-'].update(disabled=True)
-
-
 
     window.close()
 
