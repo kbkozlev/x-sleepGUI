@@ -11,7 +11,7 @@ def process(pag, random):
 
         while b <= a:
             pag.PAUSE = random.randint(1, 5)
-            pag.moveRel(random.randint(-500, 500), random.randint(-500, 500), duration=1)
+            pag.moveRel(random.randint(-500, 500), random.randint(-500, 500), duration=0.5)
             b += 1
 
         pag.press('capslock')
