@@ -1,8 +1,9 @@
 import random
+import fuckit
 import PySimpleGUI as sg
 import pyautogui as pag
 import multiprocess as mp
-import threading
+from threading import Thread, Event
 from background_process import process
 from timer import countdown
 
@@ -30,7 +31,8 @@ def main_window():
                           ],
                          [sg.Radio('Off', 'timer', default=True, enable_events=True, key='-OFF-'),
                           sg.Radio('On', 'timer', enable_events=True, key='-ON-'), sg.Push(),
-                          sg.I(background_color='#dae0e6', size=8, key='-LOG_TIME-', justification='c', disabled=False,
+                          sg.I(background_color='#dae0e6', size=8, key='-LOG_TIME-', justification='c',
+                               default_text='00:00:00', disabled=True, disabled_readonly_text_color='grey',
                                disabled_readonly_background_color='#dae0e6', readonly=True)]
                          ], expand_x=True)],
               [sg.Frame('Log',
@@ -39,10 +41,10 @@ def main_window():
                sg.Button('Exit', size=8, button_color='#db5656')]
               ]
 
-    window = sg.Window("X-sleep", layout)
+    window = sg.Window("X-sleep", layout, keep_on_top=True)
 
     while True:
-        event, values = window.read(timeout=1)
+        event, values = window.read(timeout=10)
 
         if event in ('Exit', sg.WIN_CLOSED):
             break
@@ -53,16 +55,14 @@ def main_window():
             bgp.start()
 
             if values['-ON-']:
-                active = True
-                t1 = threading.Thread(target=countdown, args=(values['-H-'], values['-M-'], values['-S-'],
-                                                              lambda: active, window), daemon=True).start()
+                event_t = Event()
+                Thread(target=countdown, args=(values['-H-'], values['-M-'], values['-S-'], window, event_t, bgp),
+                       daemon=True).start()
 
         if event == 'Stop':
-            active = False
-            try:
+            with fuckit:
+                event_t.set()
                 bgp.terminate()
-            except Exception as e:
-                print(e)
 
         # Events for Frame - Hotkey
         if event == '-DEF-':
@@ -81,11 +81,13 @@ def main_window():
             window['-H-'].update(disabled=False)
             window['-M-'].update(disabled=False)
             window['-S-'].update(disabled=False)
+            window['-LOG_TIME-'].update(disabled=False, text_color='black')
 
         elif event == '-OFF-':
             window['-H-'].update(disabled=True)
             window['-M-'].update(disabled=True)
             window['-S-'].update(disabled=True)
+            window['-LOG_TIME-'].update(disabled=True, text_color='grey')
 
     window.close()
 
