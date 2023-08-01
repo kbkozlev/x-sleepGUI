@@ -1,5 +1,5 @@
 import random
-import fuckit
+import time
 import PySimpleGUI as sg
 import pyautogui as pag
 import multiprocess as mp
@@ -13,6 +13,7 @@ def create_process(args, *kwargs):
 
 
 def main_window():
+    start = False
     layout = [[sg.Frame('Hotkey',
                         [[sg.I(disabled=True, default_text='CTRL + ALT + C', justification='c',
                                disabled_readonly_text_color='grey', disabled_readonly_background_color='#dae0e6',
@@ -36,8 +37,10 @@ def main_window():
                                disabled_readonly_background_color='#dae0e6', readonly=True)]
                          ], expand_x=True)],
               [sg.Frame('Log',
-                        [[sg.I(background_color='#dae0e6', size=45, key='-LOG-')]], expand_x=True)],
-              [sg.Button('Start', size=8, button_color='#5fad65'), sg.Button('Stop', size=8, button_color='#ffcf61'),
+                        [[sg.I(background_color='#dae0e6', size=45, key='-LOG-', justification='c',
+                               text_color='white')]], expand_x=True)],
+              [sg.Button('Start', size=8, button_color='#5fad65'),
+               sg.Button('Stop', size=8, button_color='#ffcf61'),
                sg.Button('Exit', size=8, button_color='#db5656')]
               ]
 
@@ -52,17 +55,38 @@ def main_window():
         if event == 'Start':
             bgp = create_process(process, pag, random)
             bgp.daemon = True
-            bgp.start()
+            start = True
 
             if values['-ON-']:
                 event_t = Event()
                 Thread(target=countdown, args=(values['-H-'], values['-M-'], values['-S-'], window, event_t, bgp),
                        daemon=True).start()
+                start = False
+
+            bgp.start()
+            window['-LOG-'].update('Application running', background_color='#5fad65')
 
         if event == 'Stop':
-            with fuckit:
+            if start:
+                try:
+                    bgp.terminate()
+                    window['-LOG-'].update('Application terminated', background_color='#ffcf61')
+                    window.refresh()
+                except:
+                    pass
+                finally:
+                    start = False
+
+            elif values['-ON-']:
                 event_t.set()
-                bgp.terminate()
+
+            else:
+                window['-LOG-'].update('Application not running', background_color='#db5656')
+                window.refresh()
+
+            time.sleep(1)
+            window['-LOG-'].update('', background_color='#dae0e6')
+            window.refresh()
 
         # Events for Frame - Hotkey
         if event == '-DEF-':
@@ -100,4 +124,5 @@ if __name__ == '__main__':
     MINUTES = list(range(0, 60))
     SECONDS = list(range(0, 60))
 
+    global start
     main_window()

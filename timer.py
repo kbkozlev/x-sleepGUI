@@ -1,5 +1,4 @@
 import time
-import fuckit
 from threading import Event
 
 
@@ -15,8 +14,12 @@ def countdown(hours, minutes, seconds, window, event: Event, bgp):
         if event.is_set():
             break
     window['-LOG_TIME-'].update("00:00:00")
-    with fuckit:
-        bgp.terminate()
+    bgp.terminate()
+    window['-LOG-'].update('Application terminated', background_color='#ffcf61')
+    window.refresh()
+    time.sleep(1)
+    window['-LOG-'].update('', background_color='#dae0e6')
+    window.refresh()
 
 
 
