@@ -2,6 +2,23 @@ import requests
 import multiprocess as mp
 import time
 from threading import Event
+import logging
+
+logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
+                    format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
+
+
+def graceful_exit(process='bgp', event='event_t', window=None):
+    try:
+        process.terminate()
+    except Exception as e:
+        logging.error(e)
+    try:
+        event.set()
+    except Exception as e:
+        logging.error(e)
+    finally:
+        window.write_event_value('Exit', True)
 
 
 def countdown(hours, minutes, seconds, window, event: Event, bgp):
@@ -30,7 +47,8 @@ def get_latest_version():
         latest_release = response.json()['tag_name']
         download_url = response.json()['html_url']
 
-    except:
+    except Exception as e:
+        logging.error(e)
         latest_release = None
         download_url = None
 

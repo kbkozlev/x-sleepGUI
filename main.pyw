@@ -4,9 +4,16 @@ import re
 import webbrowser
 import PySimpleGUI as sg
 import pyautogui as pag
-from functions import get_latest_version, create_process, countdown
+import keyboard
+import fuckit
+import logging
+from functions import get_latest_version, create_process, countdown, graceful_exit
 from threading import Thread, Event
 from mouse_jiggler import jiggler
+from configurator import Configurator
+
+logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
+                    format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 
 
 def about_window():
@@ -78,9 +85,9 @@ def main_window():
 
     layout = [[sg.Menubar(app_menu)],
               [sg.Frame('Hotkey',
-                        [[sg.I(disabled=True, default_text='CTRL + ALT + C', justification='c',
+                        [[sg.I(disabled=True, default_text=conf.get_value('hot_key'), justification='c',
                                disabled_readonly_text_color='grey', disabled_readonly_background_color='#dae0e6',
-                               key='-INP-')],
+                               key='-HT_KEY-')],
                          [sg.Radio('Default', 'sel', default=True, enable_events=True, key='-DEF-'),
                           sg.Radio('Custom', 'sel', enable_events=True, key='-CUST-'), sg.Push(),
                           sg.B('Apply', size=8, disabled=True, disabled_button_color='light grey', key='-APP_HT-')]
@@ -113,6 +120,9 @@ def main_window():
     while True:
         event, values = window.read(timeout=10)
 
+        with fuckit:
+            keyboard.add_hotkey(str(values['-HT_KEY-']), lambda: graceful_exit(window=window))
+
         if event in ('Exit', sg.WIN_CLOSED):
             break
 
@@ -124,7 +134,6 @@ def main_window():
             bgp.daemon = True
 
             if values['-ON-']:
-                event_t = Event()
                 Thread(target=countdown, args=(values['-H-'], values['-M-'], values['-S-'], window, event_t, bgp),
                        daemon=True).start()
 
@@ -137,9 +146,12 @@ def main_window():
                 event_t.set()
 
             else:
-                bgp.terminate()
-                window['-LOG-'].update('Application terminated', background_color='#ffcf61')
-                window.refresh()
+                try:
+                    bgp.terminate()
+                    window['-LOG-'].update('Application terminated', background_color='#ffcf61')
+                    window.refresh()
+                except Exception as e:
+                    logging.error(e)
 
             time.sleep(1)
             window['-LOG-'].update('', background_color='#dae0e6')
@@ -149,15 +161,20 @@ def main_window():
 
         # Events for Frame - Hotkey
         if event == '-DEF-':
-            window['-INP-'].update(disabled=True)
-            window['-INP-'].update(text_color='grey')
+            window['-HT_KEY-'].update(disabled=True)
+            window['-HT_KEY-'].update(text_color='grey')
             window['-APP_HT-'].update(disabled=True)
 
         if event == '-CUST-':
-            window['-INP-'].update(disabled=False)
-            window['-INP-'].update(text_color='black')
+            window['-HT_KEY-'].update(disabled=False)
+            window['-HT_KEY-'].update(text_color='black')
             window['-APP_HT-'].update(disabled=False)
             window['-APP_HT-'].update(button_color='#93b7a6')
+
+        if event == '-APP_HT-':
+            conf.htk_cust = True
+            conf.hot_key = values['-HT_KEY-']
+            conf.save_config_file()
 
         # Events for Frame - Timer
         if event == '-ON-':
@@ -197,5 +214,10 @@ if __name__ == '__main__':
 
     theme = sg.theme("Reddit")
     sg.set_options(force_modal_windows=True, dpi_awareness=True, use_ttk_buttons=True, icon=ICON)
+
+    event_t = Event()
+
+    conf = Configurator()
+    conf.create_on_start()
 
     main_window()
