@@ -2,7 +2,7 @@ import pyautogui as pag
 import random
 
 
-def process(pag, random):
+def jiggler(pag, random):
     pag.FAILSAFE = False
 
     while True:

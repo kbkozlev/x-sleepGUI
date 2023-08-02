@@ -1,3 +1,5 @@
+import requests
+import multiprocess as mp
 import time
 from threading import Event
 
@@ -22,12 +24,18 @@ def countdown(hours, minutes, seconds, window, event: Event, bgp):
     window.refresh()
 
 
+def get_latest_version():
+    try:
+        response = requests.get("https://api.github.com/repos/kbkozlev/x-sleepGUI/releases/latest")
+        latest_release = response.json()['tag_name']
+        download_url = response.json()['html_url']
+
+    except:
+        latest_release = None
+        download_url = None
+
+    return latest_release, download_url
 
 
-
-
-
-
-
-
-
+def create_process(args, *kwargs):
+    return mp.Process(target=args, args=kwargs)
