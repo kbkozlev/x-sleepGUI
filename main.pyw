@@ -102,7 +102,7 @@ def main_window():
               [sg.Frame('Log',
                         [[sg.I(background_color='#dae0e6', size=45, key='-LOG-', justification='c',
                                text_color='white')]], expand_x=True)],
-              [sg.Button('Start', size=8, button_color='#5fad65'),
+              [sg.Button('Start', size=8, button_color='#93b7a6'),
                sg.Button('Stop', size=8, button_color='#ffcf61', disabled=True,
                          disabled_button_color='light grey', key='-STOP-'),
                sg.Button('Exit', size=8, button_color='#db5656')]
