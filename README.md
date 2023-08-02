@@ -15,7 +15,7 @@
 <div>
 
 # X-SleepGUI
-"Don't sleep" or X-Sleep for short is the most advanced mouse jiggler providing you with a GUI, timer with auto-shutof and Hot-Keys for emergency cutof.
+"Don't sleep" or X-Sleep for short is the most advanced mouse jiggler providing you with a timer with auto stop and Hot-Keys for emergency cut off.
      
 # Download and Run
 You can download the latest <a href="https://github.com/kbkozlev/x-sleepGUI/releases">release</a> or use the command line to download the source code:
