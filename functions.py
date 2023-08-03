@@ -3,9 +3,19 @@ import multiprocess as mp
 import time
 from threading import Event
 import logging
+from configurator import Configurator
 
 logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
+
+
+def get_hotkey(conf):
+    cust = conf.get_value('htk_cust')
+    if cust:
+        hot_hey = conf.get_value('cust_hot_key')
+    else:
+        hot_hey = conf.get_value('def_hot_key')
+    return hot_hey, cust
 
 
 def graceful_exit(process='bgp', event='event_t', window=None):

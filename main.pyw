@@ -7,7 +7,7 @@ import pyautogui as pag
 import keyboard
 import fuckit
 import logging
-from functions import get_latest_version, create_process, countdown, graceful_exit
+from functions import get_latest_version, create_process, countdown, graceful_exit, get_hotkey
 from threading import Thread, Event
 from mouse_jiggler import jiggler
 from configurator import Configurator
@@ -26,7 +26,7 @@ def about_window():
               [sg.T()],
               [sg.Push(), sg.T("Copyright © 2023 Kaloian Kozlev", text_color='light grey'), sg.Push()]]
 
-    window = sg.Window("About", layout, icon=ICON, size=(480, 220))
+    window = sg.Window("About", layout, icon=ICON)
 
     while True:
         event, values = window.read()
@@ -45,12 +45,14 @@ def updates_window(current_release):
     latest_release, download_url = get_latest_version()
     layout = [[sg.Push(), sg.T('Version Info', font=(FONT_FAMILY, 12, 'bold')), sg.Push()],
               [sg.T()],
-              [sg.T('Current Version:', s=13), sg.T(f'{current_release}', font=(FONT_FAMILY, 10, 'bold'))],
-              [sg.T(f'Latest Version:', s=13), sg.T(f'{latest_release}', font=(FONT_FAMILY, 10, 'bold'))],
+              [sg.T('Current Version:', s=13, justification='r'), sg.T(f'{current_release}',
+                                                                       font=(FONT_FAMILY, 10, 'bold'))],
+              [sg.T(f'Latest Version:', s=13, justification='r'), sg.T(f'{latest_release}',
+                                                                       font=(FONT_FAMILY, 10, 'bold'))],
               [sg.Push(), sg.T(justification="c", key="-INFO-"), sg.Push()],
               [sg.Push(), sg.B('Download', key='download', s=8, button_color='#93b7a6'), sg.Push()]]
 
-    window = sg.Window("Check for Updates", layout, icon=ICON, size=(480, 220))
+    window = sg.Window("Check for Updates", layout, icon=ICON, size=(480, 300))
 
     while True:
         event, values = window.read()
@@ -82,14 +84,14 @@ def updates_window(current_release):
 
 def main_window():
     app_menu = [['Help', ['About', 'Check for Updates']]]
+    hot_key, cust = get_hotkey(conf)
 
     layout = [[sg.Menubar(app_menu)],
               [sg.Frame('Hotkey',
-                        [[sg.I(disabled=True, default_text=conf.get_value('hot_key'), justification='c',
+                        [[sg.I(disabled=True, default_text=hot_key, justification='c',
                                disabled_readonly_text_color='grey', disabled_readonly_background_color='#dae0e6',
                                key='-HT_KEY-')],
-                         [sg.Radio('Default', 'sel', default=True, enable_events=True, key='-DEF-'),
-                          sg.Radio('Custom', 'sel', enable_events=True, key='-CUST-'), sg.Push(),
+                         [sg.Checkbox('Custom', key='-CUST-', enable_events=True), sg.Push(),
                           sg.B('Apply', size=8, disabled=True, disabled_button_color='light grey', key='-APP_HT-')]
                          ], expand_x=True)],
               [sg.Frame('Timer',
@@ -160,20 +162,22 @@ def main_window():
             window['-STOP-'].update(disabled=True)
 
         # Events for Frame - Hotkey
-        if event == '-DEF-':
-            window['-HT_KEY-'].update(disabled=True)
-            window['-HT_KEY-'].update(text_color='grey')
-            window['-APP_HT-'].update(disabled=True)
-
-        if event == '-CUST-':
+        if values['-CUST-']:
             window['-HT_KEY-'].update(disabled=False)
             window['-HT_KEY-'].update(text_color='black')
             window['-APP_HT-'].update(disabled=False)
             window['-APP_HT-'].update(button_color='#93b7a6')
 
+        else:
+            conf.get_value('def_htk_key')
+            window.refresh()
+            window['-HT_KEY-'].update(disabled=True)
+            window['-HT_KEY-'].update(text_color='grey')
+            window['-APP_HT-'].update(disabled=True)
+
         if event == '-APP_HT-':
             conf.htk_cust = True
-            conf.hot_key = values['-HT_KEY-']
+            conf.cust_hot_key = values['-HT_KEY-']
             conf.save_config_file()
 
         # Events for Frame - Timer

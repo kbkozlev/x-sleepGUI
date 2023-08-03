@@ -9,7 +9,8 @@ class Configurator:
     def __init__(self):
         # Hard coded values if config file doesn't exist
         self.htk_cust: bool = False
-        self.hot_key: str = 'CTRL + ALT + C'
+        self.def_hot_key: str = 'CTRL + ALT + C'
+        self.cust_hot_key: str = ''
 
     def read_config_file(self, config_file_name: str = "config.json"):
         try:
