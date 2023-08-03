@@ -17,7 +17,7 @@ def get_hotkey(conf):
     return hot_hey, cust
 
 
-def graceful_exit(process='bgp', event='event_t', window=None):
+def graceful_exit(process, event, window):
     try:
         event.set()
     except Exception as e:
@@ -41,13 +41,16 @@ def countdown(hours, minutes, seconds, window, event: Event, bgp):
         countdown_time -= 1
         if event.is_set():
             break
-    window['-LOG_TIME-'].update("00:00:00")
+
     bgp.terminate()
+    event.clear()
+    window['-LOG_TIME-'].update("00:00:00")
     window['-LOG-'].update('Application terminated', background_color='#ffcf61')
     window.refresh()
     time.sleep(1)
     window['-LOG-'].update('', background_color='#dae0e6')
-    window.refresh()
+    window['-STOP-'].update(disabled=True)
+    return
 
 
 def get_latest_version():

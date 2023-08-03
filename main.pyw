@@ -43,8 +43,8 @@ def about_window():
 
 def updates_window(current_release):
     latest_release, download_url = get_latest_version()
-    layout = [[sg.Push(), sg.T('Version Info', font=(FONT_FAMILY, 12, 'bold')), sg.Push()],
-              [sg.T()],
+    layout = [[sg.Push(), sg.T('Version Info', font=(FONT_FAMILY, 12, 'bold'), justification='c'), sg.Push()],
+              [sg.T(s=30)],
               [sg.T('Current Version:', s=13, justification='r'), sg.T(f'{current_release}',
                                                                        font=(FONT_FAMILY, 10, 'bold'))],
               [sg.T(f'Latest Version:', s=13, justification='r'), sg.T(f'{latest_release}',
@@ -52,7 +52,7 @@ def updates_window(current_release):
               [sg.Push(), sg.T(justification="c", key="-INFO-"), sg.Push()],
               [sg.Push(), sg.B('Download', key='download', s=8, button_color='#93b7a6'), sg.Push()]]
 
-    window = sg.Window("Check for Updates", layout, icon=ICON, size=(480, 300))
+    window = sg.Window("Check for Updates", layout, icon=ICON)
 
     while True:
         event, values = window.read()
@@ -84,15 +84,15 @@ def updates_window(current_release):
 
 def main_window():
     app_menu = [['Help', ['About', 'Check for Updates']]]
-    hot_key, cust = get_hotkey(conf)
 
     layout = [[sg.Menubar(app_menu)],
               [sg.Frame('Hotkey',
                         [[sg.I(disabled=True, default_text=hot_key, justification='c',
                                disabled_readonly_text_color='grey', disabled_readonly_background_color='#dae0e6',
                                key='-HT_KEY-')],
-                         [sg.Checkbox('Custom', key='-CUST-', enable_events=True), sg.Push(),
-                          sg.B('Apply', size=8, disabled=True, disabled_button_color='light grey', key='-APP_HT-')]
+                         [sg.Checkbox('Change', key='-CHANGE-', enable_events=True), sg.Push(),
+                          sg.B('Reset', size=8, key='-RESET-'),
+                          sg.B('Apply', size=8, disabled=True, disabled_button_color='light grey', key='-APPLY-')]
                          ], expand_x=True)],
               [sg.Frame('Timer',
                         [[sg.T('Hours:'), sg.DropDown(HOURS, default_value=0, key='-H-', disabled=True,
@@ -123,7 +123,8 @@ def main_window():
         event, values = window.read(timeout=10)
 
         with fuckit:
-            keyboard.add_hotkey(str(values['-HT_KEY-']), lambda: graceful_exit(window=window))
+            keyboard.add_hotkey(str(values['-HT_KEY-']),
+                                lambda: graceful_exit(process=bgp, event=thread_event, window=window))
 
         if event in ('Exit', sg.WIN_CLOSED):
             break
@@ -136,7 +137,7 @@ def main_window():
             bgp.daemon = True
 
             if values['-ON-']:
-                Thread(target=countdown, args=(values['-H-'], values['-M-'], values['-S-'], window, event_t, bgp),
+                Thread(target=countdown, args=(values['-H-'], values['-M-'], values['-S-'], window, thread_event, bgp),
                        daemon=True).start()
 
             bgp.start()
@@ -145,40 +146,47 @@ def main_window():
         elif event == '-STOP-':
 
             if values['-ON-']:
-                event_t.set()
+                thread_event.set()
 
             else:
                 try:
                     bgp.terminate()
-                    window['-LOG-'].update('Application terminated', background_color='#ffcf61')
-                    window.refresh()
                 except Exception as e:
                     logging.error(e)
 
-            time.sleep(1)
-            window['-LOG-'].update('', background_color='#dae0e6')
-            window.refresh()
-
-            window['-STOP-'].update(disabled=True)
+                window['-LOG-'].update('Application terminated', background_color='#ffcf61')
+                window.refresh()
+                time.sleep(1)
+                window['-LOG-'].update('', background_color='#dae0e6')
+                window['-STOP-'].update(disabled=True)
 
         # Events for Frame - Hotkey
-        if values['-CUST-']:
+        if values['-CHANGE-']:
             window['-HT_KEY-'].update(disabled=False)
             window['-HT_KEY-'].update(text_color='black')
-            window['-APP_HT-'].update(disabled=False)
-            window['-APP_HT-'].update(button_color='#93b7a6')
+            window['-APPLY-'].update(disabled=False)
+            window['-APPLY-'].update(button_color='#93b7a6')
 
         else:
             conf.get_value('def_htk_key')
             window.refresh()
             window['-HT_KEY-'].update(disabled=True)
             window['-HT_KEY-'].update(text_color='grey')
-            window['-APP_HT-'].update(disabled=True)
+            window['-APPLY-'].update(disabled=True)
 
-        if event == '-APP_HT-':
+        if event == '-APPLY-':
             conf.htk_cust = True
-            conf.cust_hot_key = values['-HT_KEY-']
+            conf.cust_hot_key = str(values['-HT_KEY-']).upper()
             conf.save_config_file()
+            window['-HT_KEY-'].update(conf.get_value('cust_hot_key'))
+            window['-CHANGE-'].update(False)
+
+        if event == '-RESET-':
+            conf.htk_cust = False
+            conf.cust_hot_key = ''
+            conf.save_config_file()
+            window['-HT_KEY-'].update(conf.get_value('def_hot_key'))
+            window['-CHANGE-'].update(False)
 
         # Events for Frame - Timer
         if event == '-ON-':
@@ -204,7 +212,6 @@ def main_window():
 
 
 if __name__ == '__main__':
-
     RELEASE = '1.0.0'
     WINDOW_TITLE = f"X-Sleep GUI v{RELEASE}"
     FONT_FAMILY = "Arial"
@@ -219,9 +226,11 @@ if __name__ == '__main__':
     theme = sg.theme("Reddit")
     sg.set_options(force_modal_windows=True, dpi_awareness=True, use_ttk_buttons=True, icon=ICON)
 
-    event_t = Event()
+    thread_event = Event()
 
     conf = Configurator()
     conf.create_on_start()
+
+    hot_key, cust = get_hotkey(conf)
 
     main_window()

@@ -1,7 +1,3 @@
-import pyautogui as pag
-import random
-
-
 def jiggler(pag, random):
     pag.FAILSAFE = False
 
