@@ -22,13 +22,12 @@ def graceful_exit(process='bgp', event='event_t', window=None):
         event.set()
     except Exception as e:
         logging.error(e)
-
-    try:
-        process.terminate()
-    except Exception as e:
-        logging.error(e)
-    finally:
-        window.write_event_value('Exit', True)
+        try:
+            process.terminate()
+        except Exception as e:
+            logging.error(e)
+        finally:
+            window.write_event_value('Exit', True)
 
 
 def countdown(hours, minutes, seconds, window, event: Event, bgp):
