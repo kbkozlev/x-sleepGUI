@@ -19,11 +19,12 @@ def get_hotkey(conf):
 
 def graceful_exit(process='bgp', event='event_t', window=None):
     try:
-        process.terminate()
+        event.set()
     except Exception as e:
         logging.error(e)
+
     try:
-        event.set()
+        process.terminate()
     except Exception as e:
         logging.error(e)
     finally:
