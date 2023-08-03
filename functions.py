@@ -3,7 +3,6 @@ import multiprocess as mp
 import time
 from threading import Event
 import logging
-from configurator import Configurator
 
 logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
