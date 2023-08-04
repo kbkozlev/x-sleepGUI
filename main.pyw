@@ -1,13 +1,15 @@
 import random
 import time
 import re
+import sys
+import multiprocess
 import webbrowser
 import PySimpleGUI as sg
 import pyautogui as pag
 import keyboard
 import fuckit
 import logging
-from functions import get_latest_version, create_process, countdown, graceful_exit, get_hotkey
+from functions import get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key
 from threading import Thread, Event
 from mouse_jiggler import jiggler
 from configurator import Configurator
@@ -32,7 +34,6 @@ def about_window():
         event, values = window.read()
 
         match event:
-
             case sg.WIN_CLOSED:
                 break
 
@@ -57,10 +58,9 @@ def updates_window(current_release):
     while True:
         event, values = window.read()
 
-        if event == sg.WIN_CLOSED:
-            break
-
         match event:
+            case sg.WIN_CLOSED:
+                break
 
             case 'download':
                 if latest_release is not None:
@@ -122,9 +122,7 @@ def main_window():
     while True:
         event, values = window.read(timeout=10)
 
-        with fuckit:
-            keyboard.add_hotkey(str(values['-HT_KEY-']),
-                                lambda: graceful_exit(process=bgp, event=thread_event, window=window))
+        keyboard.add_hotkey(hot_key, lambda: graceful_exit(thread_event, window))
 
         if event in ('Exit', sg.WIN_CLOSED):
             break
@@ -145,7 +143,7 @@ def main_window():
 
         elif event == '-STOP-':
 
-            if values['-ON-']:
+            if values['-ON-'] and values['-LOG_TIME-'] != '00:00:00':
                 thread_event.set()
 
             else:
@@ -175,11 +173,21 @@ def main_window():
             window['-APPLY-'].update(disabled=True)
 
         if event == '-APPLY-':
-            conf.htk_cust = True
-            conf.cust_hot_key = str(values['-HT_KEY-']).upper()
-            conf.save_config_file()
-            window['-HT_KEY-'].update(conf.get_value('cust_hot_key'))
-            window['-CHANGE-'].update(False)
+            result = correct_key(data=values['-HT_KEY-'])
+            if not result:
+                conf.htk_cust = True
+                conf.cust_hot_key = str(values['-HT_KEY-']).upper()
+                conf.save_config_file()
+                window['-HT_KEY-'].update(conf.get_value('cust_hot_key'))
+                window['-CHANGE-'].update(False)
+            else:
+                is_singular = len(result) == 1
+                window['-LOG-'].update(f'{result} {"key is" if is_singular else "keys are"} not valid!',
+                                       background_color='#db5656')
+                window.refresh()
+                time.sleep(2)
+                window['-LOG-'].update('')
+                window['-LOG-'].update('', background_color='#dae0e6')
 
         if event == '-RESET-':
             conf.htk_cust = False
@@ -196,9 +204,9 @@ def main_window():
             window['-LOG_TIME-'].update(disabled=False, text_color='black')
 
         elif event == '-OFF-':
-            window['-H-'].update(disabled=True)
-            window['-M-'].update(disabled=True)
-            window['-S-'].update(disabled=True)
+            window['-H-'].update(disabled=True, value=0)
+            window['-M-'].update(disabled=True, value=0)
+            window['-S-'].update(disabled=True, value=0)
             window['-LOG_TIME-'].update(disabled=True, text_color='grey')
 
         # Events for menubar
@@ -212,6 +220,10 @@ def main_window():
 
 
 if __name__ == '__main__':
+    if sys.platform.startswith('win'):
+        # On Windows calling this function is necessary.
+        multiprocess.freeze_support()
+
     RELEASE = '1.0.0'
     WINDOW_TITLE = f"X-Sleep GUI v{RELEASE}"
     FONT_FAMILY = "Arial"
