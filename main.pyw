@@ -7,7 +7,6 @@ import webbrowser
 import PySimpleGUI as sg
 import pyautogui as pag
 import keyboard
-import fuckit
 import logging
 from functions import get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key
 from threading import Thread, Event
@@ -83,6 +82,8 @@ def updates_window(current_release):
 
 
 def main_window():
+    global hot_key
+
     app_menu = [['Help', ['About', 'Check for Updates']]]
 
     layout = [[sg.Menubar(app_menu)],
@@ -166,8 +167,6 @@ def main_window():
             window['-APPLY-'].update(button_color='#93b7a6')
 
         else:
-            conf.get_value('def_htk_key')
-            window.refresh()
             window['-HT_KEY-'].update(disabled=True)
             window['-HT_KEY-'].update(text_color='grey')
             window['-APPLY-'].update(disabled=True)
@@ -178,8 +177,8 @@ def main_window():
                 conf.htk_cust = True
                 conf.cust_hot_key = str(values['-HT_KEY-']).upper()
                 conf.save_config_file()
-                window['-HT_KEY-'].update(conf.get_value('cust_hot_key'))
                 window['-CHANGE-'].update(False)
+                hot_key = get_hotkey(conf)
             else:
                 is_singular = len(result) == 1
                 window['-LOG-'].update(f'{result} {"key is" if is_singular else "keys are"} not valid!',
@@ -195,6 +194,7 @@ def main_window():
             conf.save_config_file()
             window['-HT_KEY-'].update(conf.get_value('def_hot_key'))
             window['-CHANGE-'].update(False)
+            hot_key = get_hotkey(conf)
 
         # Events for Frame - Timer
         if event == '-ON-':
@@ -221,7 +221,6 @@ def main_window():
 
 if __name__ == '__main__':
     if sys.platform.startswith('win'):
-        # On Windows calling this function is necessary.
         multiprocess.freeze_support()
 
     RELEASE = '1.0.0'
@@ -243,6 +242,6 @@ if __name__ == '__main__':
     conf = Configurator()
     conf.create_on_start()
 
-    hot_key, cust = get_hotkey(conf)
+    hot_key = get_hotkey(conf)
 
     main_window()

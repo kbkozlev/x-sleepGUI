@@ -30,7 +30,7 @@ def get_hotkey(conf):
         hot_hey = conf.get_value('cust_hot_key')
     else:
         hot_hey = conf.get_value('def_hot_key')
-    return hot_hey, cust
+    return hot_hey
 
 
 def graceful_exit(event, window):
