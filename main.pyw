@@ -175,10 +175,9 @@ def main_window():
             result = correct_key(data=values['-HT_KEY-'])
             if not result:
                 conf.htk_cust = True
-                conf.cust_hot_key = str(values['-HT_KEY-']).upper()
+                hot_key = conf.cust_hot_key = str(values['-HT_KEY-']).upper()
                 conf.save_config_file()
                 window['-CHANGE-'].update(False)
-                hot_key = get_hotkey(conf)
             else:
                 is_singular = len(result) == 1
                 window['-LOG-'].update(f'{result} {"key is" if is_singular else "keys are"} not valid!',
@@ -192,9 +191,9 @@ def main_window():
             conf.htk_cust = False
             conf.cust_hot_key = ''
             conf.save_config_file()
-            window['-HT_KEY-'].update(conf.get_value('def_hot_key'))
-            window['-CHANGE-'].update(False)
             hot_key = get_hotkey(conf)
+            window['-HT_KEY-'].update(hot_key)
+            window['-CHANGE-'].update(False)
 
         # Events for Frame - Timer
         if event == '-ON-':
