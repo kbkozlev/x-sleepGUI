@@ -224,7 +224,7 @@ if __name__ == '__main__':
         multiprocess.freeze_support()
 
     RELEASE = '1.0.1'
-    WINDOW_TITLE = f"X-Sleep GUI v{RELEASE}"
+    WINDOW_TITLE = f"X-Sleep"
     FONT_FAMILY = "Arial"
     HOURS = list(range(0, 24))
     MINUTES = list(range(0, 60))
