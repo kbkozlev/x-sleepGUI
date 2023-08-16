@@ -14,18 +14,18 @@ keys = ['ALT', 'CTRL', 'SHIFT', 'WINDOWS',
         'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12']
 
 
-def correct_key(data):
+def correct_key(text: str):
     not_valid = []
-    key = data.upper().replace(' ', '').split('+')
+    key = text.upper().replace(' ', '').split('+')
     for k in key:
         if k not in keys:
             not_valid.append(k)
 
-    return not_valid
+    return not_valid, ' + '.join(text.replace(' ', '').split('+')).upper()
 
 
 def get_hotkey(conf):
-    cust = conf.get_value('htk_cust')
+    cust = conf.get_value('hot_key_state')
     if cust:
         hot_hey = conf.get_value('cust_hot_key')
     else:
@@ -52,10 +52,10 @@ def countdown(hours, minutes, seconds, window, event: Event, bgp):
             minutes = int(countdown_time / 60) % 60
             hours = int(countdown_time / 3600)
             window['-LOG_TIME-'].update(f"{hours:02}:{minutes:02}:{seconds:02}")
-            time.sleep(1)
             countdown_time -= 1
             if event.is_set():
                 break
+            time.sleep(1)
 
         try:
             bgp.terminate()

@@ -8,7 +8,7 @@ logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
 class Configurator:
     def __init__(self):
         # Hard coded values if config file doesn't exist
-        self.htk_cust: bool = False
+        self.hot_key_state: bool = False
         self.def_hot_key: str = 'CTRL + ALT + C'
         self.cust_hot_key: str = ''
 

@@ -110,8 +110,8 @@ def main_window():
                                disabled_readonly_background_color='#dae0e6', readonly=True)]
                          ], expand_x=True)],
               [sg.Frame('Log',
-                        [[sg.I(background_color='#dae0e6', size=45, key='-LOG-', justification='c',
-                               text_color='white')]], expand_x=True)],
+                        [[sg.Input(background_color='#dae0e6', size=45, key='-LOG-', justification='c',
+                                   text_color='white')]], expand_x=True)],
               [sg.Button('Start', size=8, button_color='#93b7a6'),
                sg.Button('Stop', size=8, button_color='#ffcf61', disabled=True,
                          disabled_button_color='light grey', key='-STOP-'),
@@ -172,23 +172,24 @@ def main_window():
             window['-APPLY-'].update(disabled=True)
 
         if event == '-APPLY-':
-            result = correct_key(data=values['-HT_KEY-'])
-            if not result:
-                conf.htk_cust = True
-                hot_key = conf.cust_hot_key = str(values['-HT_KEY-']).upper()
+            wrong_values, format_str = correct_key(text=values['-HT_KEY-'])
+            if not wrong_values:
+                conf.hot_key_state = True
+                hot_key = conf.cust_hot_key = format_str
                 conf.save_config_file()
+                window['-HT_KEY-'].update(format_str)
                 window['-CHANGE-'].update(False)
             else:
-                is_singular = len(result) == 1
-                window['-LOG-'].update(f'{result} {"key is" if is_singular else "keys are"} not valid!',
-                                       background_color='#db5656')
+                window['-LOG-'].update(
+                    f'{wrong_values} {"key is" if len(wrong_values) == 1 else "keys are"} not valid!',
+                    background_color='#db5656')
                 window.refresh()
                 time.sleep(2)
                 window['-LOG-'].update('')
                 window['-LOG-'].update('', background_color='#dae0e6')
 
         if event == '-RESET-':
-            conf.htk_cust = False
+            conf.hot_key_state = False
             conf.cust_hot_key = ''
             conf.save_config_file()
             hot_key = get_hotkey(conf)
@@ -222,7 +223,7 @@ if __name__ == '__main__':
     if sys.platform.startswith('win'):
         multiprocess.freeze_support()
 
-    RELEASE = '1.0.0'
+    RELEASE = '1.0.1'
     WINDOW_TITLE = f"X-Sleep GUI v{RELEASE}"
     FONT_FAMILY = "Arial"
     HOURS = list(range(0, 24))
