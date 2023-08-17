@@ -25,8 +25,7 @@ def correct_key(text: str):
 
 
 def get_hotkey(conf):
-    cust = conf.get_value('hot_key_state')
-    if cust:
+    if conf.get_value('hot_key_state'):
         hot_hey = conf.get_value('cust_hot_key')
     else:
         hot_hey = conf.get_value('def_hot_key')
