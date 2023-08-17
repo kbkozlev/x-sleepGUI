@@ -21,7 +21,7 @@ def correct_key(text: str):
         if k not in keys:
             not_valid.append(k)
 
-    return not_valid, ' + '.join(text.replace(' ', '').split('+')).upper()
+    return not_valid, ' + '.join(key)
 
 
 def get_hotkey(conf):
