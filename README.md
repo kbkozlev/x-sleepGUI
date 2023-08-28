@@ -1,6 +1,6 @@
 <div align='center'>
      
-<img src="https://github.com/kbkozlev/x-sleepGUI/blob/master/.github/x-sleep.png" alt="logo" width="350" height="259"><br/>
+<img src="https://github.com/kbkozlev/x-sleepGUI/blob/master/.github/x-sleep.png" alt="logo" width="366" height="260"><br/>
 
 <a href="ttps://github.com/kbkozlev/x-sleepGUI/blob/master/LICENSE.md" alt="License">
   <img src="https://img.shields.io/github/license/kbkozlev/x-sleepGUI?color=blue&style=for-the-badge" />

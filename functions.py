@@ -21,12 +21,11 @@ def correct_key(text: str):
         if k not in keys:
             not_valid.append(k)
 
-    return not_valid, ' + '.join(text.replace(' ', '').split('+')).upper()
+    return not_valid, ' + '.join(key)
 
 
 def get_hotkey(conf):
-    cust = conf.get_value('hot_key_state')
-    if cust:
+    if conf.get_value('hot_key_state'):
         hot_hey = conf.get_value('cust_hot_key')
     else:
         hot_hey = conf.get_value('def_hot_key')

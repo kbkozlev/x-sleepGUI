@@ -185,7 +185,6 @@ def main_window():
                     background_color='#db5656')
                 window.refresh()
                 time.sleep(2)
-                window['-LOG-'].update('')
                 window['-LOG-'].update('', background_color='#dae0e6')
 
         if event == '-RESET-':
