@@ -3,6 +3,7 @@ import multiprocess as mp
 import time
 from threading import Event
 import logging
+import ctypes
 
 logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
@@ -30,6 +31,10 @@ def get_hotkey(conf):
     else:
         hot_hey = conf.get_value('def_hot_key')
     return hot_hey
+
+
+def is_capslock_on():
+    return True if ctypes.WinDLL("User32.dll").GetKeyState(0x14) else False
 
 
 def graceful_exit(event, window):
