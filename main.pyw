@@ -89,7 +89,7 @@ def main_window():
               [sg.Frame('Hotkey',
                         [[sg.I(disabled=True, default_text=hot_key, justification='c',
                                disabled_readonly_text_color='grey', disabled_readonly_background_color='#dae0e6',
-                               key='-HT_KEY-')],
+                               key='-HT_KEY-', tooltip="ALT, CTRL, SHIFT, WINDOWS, A-Z, 0-9, F1-F12")],
                          [sg.Checkbox('Change', key='-CHANGE-', enable_events=True), sg.Push(),
                           sg.B('Reset', size=8, key='-RESET-'),
                           sg.B('Apply', size=8, disabled=True, disabled_button_color='light grey', key='-APPLY-')]
