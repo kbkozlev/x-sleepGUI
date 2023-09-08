@@ -1,9 +1,10 @@
 import requests
-import multiprocess as mp
-import time
-from threading import Event
 import logging
 import ctypes
+import time
+from threading import Event
+from multiprocess import Process
+
 
 logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
@@ -94,4 +95,4 @@ def get_latest_version():
 
 
 def create_process(args, *kwargs):
-    return mp.Process(target=args, args=kwargs)
+    return Process(target=args, args=kwargs)

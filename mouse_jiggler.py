@@ -1,4 +1,7 @@
-def jiggler(pag, random):
+import random
+
+
+def jiggler(pag):
     pag.FAILSAFE = False
 
     while True:

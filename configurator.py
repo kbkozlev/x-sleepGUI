@@ -12,6 +12,9 @@ class Configurator:
         self.def_hot_key: str = 'CTRL + ALT + C'
         self.cust_hot_key: str = ''
 
+    def __str__(self):
+        return f'Custom Hotkey: {self.hot_key_state} \nDefault Value: {self.def_hot_key} \nCustom Value: {self.cust_hot_key}'
+
     def read_config_file(self, config_file_name: str = "config.json"):
         try:
             with open(config_file_name) as conf_file:
@@ -19,7 +22,7 @@ class Configurator:
                 for key, value in data.items():
                     setattr(self, key, value)
         except Exception as e:
-            logging.info(f"{str(e)}. File will be created and hard coded values will be applied.")
+            logging.info(f"File will be created and hard coded values will be applied. {str(e)}")
 
     def save_config_file(self, config_file_name: str = "config.json"):
         try:

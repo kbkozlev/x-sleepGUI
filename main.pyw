@@ -1,4 +1,3 @@
-import random
 import time
 import re
 import sys
@@ -82,7 +81,7 @@ def updates_window(current_release):
 
 
 def main_window():
-    global hot_key
+    global hot_key, bgp
 
     app_menu = [['Help', ['About', 'Check for Updates']]]
 
@@ -134,7 +133,7 @@ def main_window():
             window['-STOP-'].update(button_color='#ffcf61')
             window['-START-'].update(disabled=True)
 
-            bgp = create_process(jiggler, pag, random)
+            bgp = create_process(jiggler, pag)
             bgp.daemon = True
             thread = Thread(target=countdown,
                             args=(values['-H-'], values['-M-'], values['-S-'], window, thread_event, bgp), daemon=True)
@@ -156,12 +155,12 @@ def main_window():
                 except Exception as e:
                     logging.error(e)
 
-            window['-LOG-'].update('Application terminated', background_color='#ffcf61')
-            window.refresh()
-            time.sleep(1)
-            window['-LOG-'].update('', background_color='#dae0e6')
-            window['-STOP-'].update(disabled=True)
-            window['-START-'].update(disabled=False)
+                window['-LOG-'].update('Application terminated', background_color='#ffcf61')
+                window.refresh()
+                time.sleep(1)
+                window['-LOG-'].update('', background_color='#dae0e6')
+                window['-STOP-'].update(disabled=True)
+                window['-START-'].update(disabled=False)
 
         # Events for Frame - Hotkey
         if values['-CHANGE-']:
