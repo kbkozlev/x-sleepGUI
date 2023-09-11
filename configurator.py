@@ -1,8 +1,8 @@
 import json
 import logging
 
-logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
-                    format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
+logging.basicConfig(filename='log', encoding='utf-8', level=logging.INFO,
+                    format='%(asctime)s | %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 
 
 class Configurator:
@@ -22,7 +22,7 @@ class Configurator:
                 for key, value in data.items():
                     setattr(self, key, value)
         except Exception as e:
-            logging.info(f"File will be created and hard coded values will be applied. {str(e)}")
+            logging.info(f"{str(e)} \n- File will be created and hard coded values will be applied. ")
 
     def save_config_file(self, config_file_name: str = "config.json"):
         try:
@@ -30,7 +30,7 @@ class Configurator:
             with open(config_file_name, "w") as conf_file:
                 json.dump(conf_items, conf_file, sort_keys=False, indent=2)
         except Exception as e:
-            logging.error(f"Error occurred while saving {config_file_name}: {str(e)}")
+            logging.error(f"{str(e)} \n- Error occurred while saving: {config_file_name}")
 
     def get_value(self, key):
         """Extracts a specific key-value pair from the class attributes"""

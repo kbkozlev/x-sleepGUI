@@ -6,8 +6,8 @@ from threading import Event
 from multiprocess import Process
 
 
-logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
-                    format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
+logging.basicConfig(filename='log', encoding='utf-8', level=logging.INFO,
+                    format='%(asctime)s | %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 
 keys_list = ['ALT', 'CTRL', 'SHIFT', 'WINDOWS',
              'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
