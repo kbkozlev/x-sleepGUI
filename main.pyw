@@ -21,7 +21,7 @@ def about_window():
               [sg.T()],
               [sg.Push(), sg.T(github_url['name'], enable_events=True, font=(FONT_FAMILY, 10, "underline"),
                                justification='l', text_color='#0066CC',
-                               auto_size_text=True, key='download'), sg.Push()],
+                               auto_size_text=True, key='-LINK-'), sg.Push()],
               [sg.Push(), sg.T("License: GPL-3.0", justification='c'), sg.Push()],
               [sg.T()],
               [sg.Push(), sg.T("Copyright © 2023 Kaloian Kozlev", text_color='light grey'), sg.Push()]]
@@ -35,7 +35,7 @@ def about_window():
             case sg.WIN_CLOSED:
                 break
 
-            case 'download':
+            case '-LINK-':
                 webbrowser.open(github_url['url'])
                 window.close()
 
@@ -49,7 +49,7 @@ def updates_window(current_release):
               [sg.T(f'Latest Version:', s=13, justification='r'), sg.T(f'{latest_release}',
                                                                        font=(FONT_FAMILY, 10, 'bold'))],
               [sg.Push(), sg.T(justification="c", key="-INFO-"), sg.Push()],
-              [sg.Push(), sg.B('Download', key='download', s=8, button_color='#93b7a6'), sg.Push()]]
+              [sg.Push(), sg.B('Download', key='-DOWNLOAD-', s=8, button_color='#93b7a6'), sg.Push()]]
 
     window = sg.Window("Check for Updates", layout, icon=ICON)
 
@@ -60,7 +60,7 @@ def updates_window(current_release):
             case sg.WIN_CLOSED:
                 break
 
-            case 'download':
+            case '-DOWNLOAD-':
                 if latest_release is not None:
                     current_release = re.sub(r'[^0-9]', '', current_release)
                     latest_release = re.sub(r'[^0-9]', '', latest_release)
