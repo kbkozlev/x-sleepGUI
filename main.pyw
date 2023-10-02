@@ -138,7 +138,10 @@ def main_window():
             thread = Thread(target=countdown,
                             args=(values['-H-'], values['-M-'], values['-S-'], window, thread_event, bgp), daemon=True)
 
-            if values['-ON-']:
+            if values['-ON-'] and values['-H-'] == 0 and values['-M-'] == 0 and values['-S-'] == 0:
+                window.write_event_value('-OFF-', True)
+                window['-OFF-'].update(True)
+            else:
                 thread.start()
 
             bgp.start()
