@@ -7,7 +7,7 @@ import PySimpleGUI as sg
 import pyautogui as pag
 import keyboard
 import logging
-from functions import get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key
+from functions import get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key, is_capslock_on
 from threading import Thread, Event
 from mouse_jiggler import jiggler
 from configurator import Configurator
@@ -133,7 +133,7 @@ def main_window():
             window['-STOP-'].update(button_color='#ffcf61')
             window['-START-'].update(disabled=True)
 
-            bgp = create_process(jiggler, pag, 0)
+            bgp = create_process(jiggler, pag)
             bgp.daemon = True
 
             if values['-ON-'] and values['-H-'] == 0 and values['-M-'] == 0 and values['-S-'] == 0:
@@ -148,6 +148,7 @@ def main_window():
             window['-LOG-'].update('Application running', background_color='#5fad65')
 
         elif event == '-STOP-':
+            is_capslock_on(pag)
 
             if values['-ON-'] and values['-LOG_TIME-'] != '00:00:00':
                 thread_event.set()

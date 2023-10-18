@@ -34,8 +34,9 @@ def get_hotkey(conf):
     return hot_hey
 
 
-def is_capslock_on():
-    return True if ctypes.WinDLL("User32.dll").GetKeyState(0x14) else False
+def is_capslock_on(pag):
+    if ctypes.WinDLL("User32.dll").GetKeyState(0x14):
+        pag.press('capslock')
 
 
 def graceful_exit(event, window, pag):
@@ -44,8 +45,7 @@ def graceful_exit(event, window, pag):
     except Exception as e:
         logging.error(e)
     finally:
-        if is_capslock_on():
-            pag.press('capslock')
+        is_capslock_on(pag)
         window.write_event_value('Exit', True)
 
 
