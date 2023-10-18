@@ -1,7 +1,7 @@
 import random
 
 
-def jiggler(pag):
+def jiggler(pag, button):
     pag.FAILSAFE = False
 
     while True:
@@ -13,6 +13,7 @@ def jiggler(pag):
             pag.moveRel(random.randint(-500, 500), random.randint(-500, 500), duration=0.5)
             b += 1
 
-        pag.press('capslock')
-        pag.PAUSE = 1
-        pag.press('capslock')
+        if button == 1:
+            pag.press('capslock')
+            pag.PAUSE = 1
+            pag.press('capslock')

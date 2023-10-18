@@ -1,7 +1,7 @@
 import json
 import logging
 
-logging.basicConfig(filename='log', encoding='utf-8', level=logging.INFO,
+logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s | %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 
 

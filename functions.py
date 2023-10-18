@@ -6,7 +6,7 @@ from threading import Event
 from multiprocess import Process
 
 
-logging.basicConfig(filename='log', encoding='utf-8', level=logging.INFO,
+logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s | %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 
 keys_list = ['ALT', 'CTRL', 'SHIFT', 'WINDOWS',
@@ -51,33 +51,27 @@ def graceful_exit(event, window, pag):
 
 def countdown(hours, minutes, seconds, window, event: Event, bgp):
     countdown_time = (hours * 3600) + (minutes * 60) + seconds
-    if not countdown_time == 0:
-        while countdown_time > 0:
-            if event.is_set():
-                event.clear()
-                break
+    while countdown_time > 0:
+        if event.is_set():
+            event.clear()
+            break
 
-            seconds = countdown_time % 60
-            minutes = int(countdown_time / 60) % 60
-            hours = int(countdown_time / 3600)
-            window['-LOG_TIME-'].update(f"{hours:02}:{minutes:02}:{seconds:02}")
-            countdown_time -= 1
-            time.sleep(1)
+        hours = int(countdown_time / 3600)
+        minutes = int(countdown_time / 60) % 60
+        seconds = countdown_time % 60
 
-        try:
-            bgp.terminate()
-        except Exception as e:
-            logging.error(e)
-
-        window['-LOG_TIME-'].update("00:00:00")
-        window['-LOG-'].update('Application terminated', background_color='#ffcf61')
-        window.refresh()
+        window['-LOG_TIME-'].update(f"{hours:02}:{minutes:02}:{seconds:02}")
+        countdown_time -= 1
         time.sleep(1)
-        window['-LOG-'].update('', background_color='#dae0e6')
-        window['-STOP-'].update(disabled=True)
-        window['-START-'].update(disabled=False)
-        window.write_event_value('-OFF-', True)
-        window['-OFF-'].update(True)
+
+    try:
+        bgp.terminate()
+    except Exception as e:
+        logging.error(e)
+
+    window['-LOG_TIME-'].update("00:00:00")
+    window.write_event_value('-OFF-', True)
+    window['-OFF-'].update(True)
 
 
 def get_latest_version():

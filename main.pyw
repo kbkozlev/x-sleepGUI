@@ -12,7 +12,7 @@ from threading import Thread, Event
 from mouse_jiggler import jiggler
 from configurator import Configurator
 
-logging.basicConfig(filename='log', encoding='utf-8', level=logging.INFO,
+logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s | %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 
 
@@ -133,16 +133,16 @@ def main_window():
             window['-STOP-'].update(button_color='#ffcf61')
             window['-START-'].update(disabled=True)
 
-            bgp = create_process(jiggler, pag)
+            bgp = create_process(jiggler, pag, 0)
             bgp.daemon = True
-            thread = Thread(target=countdown,
-                            args=(values['-H-'], values['-M-'], values['-S-'], window, thread_event, bgp), daemon=True)
 
             if values['-ON-'] and values['-H-'] == 0 and values['-M-'] == 0 and values['-S-'] == 0:
                 window.write_event_value('-OFF-', True)
                 window['-OFF-'].update(True)
-            else:
-                thread.start()
+            elif values['-ON-'] and (values['-H-'] != 0 or values['-M-'] != 0 or values['-S-'] != 0):
+                Thread(target=countdown,
+                       args=(values['-H-'], values['-M-'], values['-S-'], window, thread_event, bgp),
+                       daemon=True).start()
 
             bgp.start()
             window['-LOG-'].update('Application running', background_color='#5fad65')
@@ -158,12 +158,12 @@ def main_window():
                 except Exception as e:
                     logging.error(e)
 
-                window['-LOG-'].update('Application terminated', background_color='#ffcf61')
-                window.refresh()
-                time.sleep(1)
-                window['-LOG-'].update('', background_color='#dae0e6')
-                window['-STOP-'].update(disabled=True)
-                window['-START-'].update(disabled=False)
+            window['-LOG-'].update('Application terminated', background_color='#ffcf61')
+            window.refresh()
+            time.sleep(1)
+            window['-LOG-'].update('', background_color='#dae0e6')
+            window['-STOP-'].update(disabled=True)
+            window['-START-'].update(disabled=False)
 
         # Events for Frame - Hotkey
         if values['-CHANGE-']:
