@@ -271,7 +271,7 @@ if __name__ == '__main__':
     if sys.platform.startswith('win'):
         multiprocess.freeze_support()
 
-    RELEASE = '1.0.2'
+    RELEASE = '2.0.0'
     WINDOW_TITLE = "X-Sleep"
     FONT_FAMILY = "Arial"
     HOURS = list(range(0, 24))
