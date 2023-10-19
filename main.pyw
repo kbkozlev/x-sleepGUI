@@ -41,7 +41,8 @@ def about_window():
                 window.close()
 
 
-def new_version(current_release, latest_release):
+def new_version(current_release, latest_release, download_url):
+    global update_check
     layout = [[sg.Push(), sg.T('New Version Available', font=(FONT_FAMILY, 12, 'bold'), justification='c'), sg.Push()],
               [sg.T(s=30)],
               [sg.T('Current Version:', s=13, justification='r'), sg.T(f'{current_release}',
@@ -54,7 +55,7 @@ def new_version(current_release, latest_release):
                                                                                                 button_color='#db5656'),
                sg.Push()]]
 
-    window = sg.Window("New Version", layout, icon=ICON)
+    window = sg.Window("New Version Available", layout, icon=ICON, keep_on_top=True)
 
     while True:
         event, values = window.read()
@@ -73,7 +74,9 @@ def new_version(current_release, latest_release):
                         window.close()
 
             case '-EXIT-':
-                break
+                window.close()
+
+    update_check = False
 
 
 def updates_window(current_release):
@@ -117,7 +120,7 @@ def updates_window(current_release):
 
 
 def main_window():
-    global hot_key, bgp
+    global hot_key, bgp, update_check
 
     app_menu = [['Help', ['About', 'Check for Updates']]]
 
@@ -158,6 +161,9 @@ def main_window():
 
     while True:
         event, values = window.read(timeout=10)
+
+        if update_check:
+            new_version(RELEASE, latest_release_name, download_url)
 
         keyboard.add_hotkey(hot_key, lambda: graceful_exit(thread_event, window, pag))
 
@@ -283,16 +289,16 @@ if __name__ == '__main__':
     conf = Configurator()
     conf.create_on_start()
     hot_key = get_hotkey(conf)
+    update_check = False
 
-    # Check for updates before start
     try:
         latest_release_name, download_url = get_latest_version()
         if latest_release_name is not None:
             current_release = re.sub(r'[^0-9]', '', RELEASE)
             latest_release = re.sub(r'[^0-9]', '', latest_release_name)
             if int(latest_release) > int(current_release):
-                new_version(RELEASE, latest_release_name)
+                update_check = True
     except Exception as e:
         logging.error(e)
-    finally:
-        main_window()
+
+    main_window()
