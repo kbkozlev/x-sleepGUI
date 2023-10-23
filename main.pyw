@@ -7,8 +7,7 @@ import PySimpleGUI as sg
 import pyautogui as pag
 import keyboard
 import logging
-from functions import get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key, \
-    is_capslock_on
+from functions import get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key, is_capslock_on
 from threading import Thread, Event
 from mouse_jiggler import jiggler
 from configurator import Configurator
