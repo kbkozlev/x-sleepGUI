@@ -49,8 +49,22 @@ def graceful_exit(event, window, pag):
         window.write_event_value('Exit', True)
 
 
+def terminate(window, bgp):
+    try:
+        bgp.terminate()
+        window['-LOG-'].update('Application terminated', background_color='#ffcf61')
+        window.refresh()
+        time.sleep(1)
+        window['-LOG-'].update('', background_color='#dae0e6')
+        window['-STOP-'].update(disabled=True)
+        window['-START-'].update(disabled=False)
+
+    except Exception as e:
+        logging.error(e)
+
+
 def countdown(hours, minutes, seconds, window, event: Event, bgp):
-    countdown_time = (hours * 3600) + (minutes * 60) + seconds
+    countdown_time = (int(hours) * 3600) + (int(minutes) * 60) + int(seconds)
     while countdown_time > 0:
         if event.is_set():
             event.clear()
@@ -64,12 +78,8 @@ def countdown(hours, minutes, seconds, window, event: Event, bgp):
         countdown_time -= 1
         time.sleep(1)
 
-    try:
-        bgp.terminate()
-    except Exception as e:
-        logging.error(e)
-
     window['-LOG_TIME-'].update("00:00:00")
+    terminate(window, bgp)
     window.write_event_value('-OFF-', True)
     window['-OFF-'].update(True)
 
