@@ -7,7 +7,8 @@ import PySimpleGUI as sg
 import pyautogui as pag
 import keyboard
 import logging
-from functions import get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key, is_capslock_on
+from functions import (get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key,
+                       is_capslock_on, terminate)
 from threading import Thread, Event
 from mouse_jiggler import jiggler
 from configurator import Configurator
@@ -133,12 +134,12 @@ def main_window():
                           sg.B('Apply', size=8, disabled=True, disabled_button_color='light grey', key='-APPLY-')]
                          ], expand_x=True)],
               [sg.Frame('Timer',
-                        [[sg.T('Hours:'), sg.DropDown(HOURS, default_value=0, key='-H-', disabled=True,
-                                                      readonly=True, button_background_color='#93b7a6'),
-                          sg.T('Minutes:'), sg.DropDown(MINUTES, default_value=0, key='-M-', disabled=True,
-                                                        readonly=True, button_background_color='#93b7a6'),
-                          sg.T('Seconds:'), sg.DropDown(SECONDS, default_value=0, key='-S-', disabled=True,
-                                                        readonly=True, button_background_color='#93b7a6')
+                        [[sg.T('Hours:'), sg.DropDown(HOURS, default_value=' 00', key='-H-', disabled=True,
+                                                      readonly=True, button_background_color='#93b7a6', s=(3, 1)),
+                          sg.T('Minutes:'), sg.DropDown(MINUTES, default_value=' 00', key='-M-', disabled=True,
+                                                        readonly=True, button_background_color='#93b7a6', s=(3, 1)),
+                          sg.T('Seconds:'), sg.DropDown(SECONDS, default_value=' 00', key='-S-', disabled=True,
+                                                        readonly=True, button_background_color='#93b7a6', s=(3, 1))
                           ],
                          [sg.Radio('Off', 'timer', default=True, enable_events=True, key='-OFF-'),
                           sg.Radio('On', 'timer', enable_events=True, key='-ON-'), sg.Push(),
@@ -177,10 +178,10 @@ def main_window():
             bgp = create_process(jiggler, pag)
             bgp.daemon = True
 
-            if values['-ON-'] and values['-H-'] == 0 and values['-M-'] == 0 and values['-S-'] == 0:
+            if values['-ON-'] and values['-H-'] == ' 00' and values['-M-'] == ' 00' and values['-S-'] == ' 00':
                 window.write_event_value('-OFF-', True)
                 window['-OFF-'].update(True)
-            elif values['-ON-'] and (values['-H-'] != 0 or values['-M-'] != 0 or values['-S-'] != 0):
+            elif values['-ON-'] and (values['-H-'] != ' 00' or values['-M-'] != ' 00' or values['-S-'] != ' 00'):
                 Thread(target=countdown,
                        args=(values['-H-'], values['-M-'], values['-S-'], window, thread_event, bgp),
                        daemon=True).start()
@@ -195,17 +196,7 @@ def main_window():
                 thread_event.set()
 
             else:
-                try:
-                    bgp.terminate()
-                except Exception as e:
-                    logging.error(e)
-
-            window['-LOG-'].update('Application terminated', background_color='#ffcf61')
-            window.refresh()
-            time.sleep(1)
-            window['-LOG-'].update('', background_color='#dae0e6')
-            window['-STOP-'].update(disabled=True)
-            window['-START-'].update(disabled=False)
+                terminate(window, bgp)
 
         # Events for Frame - Hotkey
         if values['-CHANGE-']:
@@ -251,9 +242,9 @@ def main_window():
             window['-LOG_TIME-'].update(disabled=False, text_color='black')
 
         elif event == '-OFF-':
-            window['-H-'].update(disabled=True, value=0)
-            window['-M-'].update(disabled=True, value=0)
-            window['-S-'].update(disabled=True, value=0)
+            window['-H-'].update(disabled=True, value=' 00')
+            window['-M-'].update(disabled=True, value=' 00')
+            window['-S-'].update(disabled=True, value=' 00')
             window['-LOG_TIME-'].update(disabled=True, text_color='grey')
 
         # Events for menubar
@@ -273,9 +264,9 @@ if __name__ == '__main__':
     RELEASE = '2.0.0'
     WINDOW_TITLE = "X-Sleep"
     FONT_FAMILY = "Arial"
-    HOURS = list(range(0, 24))
-    MINUTES = list(range(0, 60))
-    SECONDS = list(range(0, 60))
+    HOURS = [f" {i:02}" for i in range(24)]
+    MINUTES = [f" {i:02}" for i in range(60)]
+    SECONDS = [f" {i:02}" for i in range(60)]
     ICON = 'media/x-sleep.ico'
 
     github_url = {'name': 'Official GitHub Page',
