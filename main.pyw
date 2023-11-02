@@ -52,7 +52,7 @@ def new_version_check(c_release, c_release_name, l_release, l_release_name, down
                sg.T(f'{l_release_name}', font=(FONT_FAMILY, 10))],
               [sg.T()],
               [sg.Push(),
-               sg.B('Yes', key='-DOWNLOAD-', s=8, button_color='#93b7a6', disabled_button_color='light grey'),
+               sg.B('Yes', key='-DOWNLOAD-', s=8, button_color='#93b7a6'),
                sg.B(key='-EXIT-', s=8, button_color='#db5656'),
                sg.Push()]]
 
@@ -61,22 +61,22 @@ def new_version_check(c_release, c_release_name, l_release, l_release_name, down
     if l_release is None:
         message = "Cannot fetch version data! \nPlease check your network connection."
         title = "Error"
-        download_disabled = True
+        download_enabled = False
         exit_text = "Exit"
     elif l_release <= c_release:
         message = "You have the latest version!"
         title = "No update available"
-        download_disabled = True
+        download_enabled = False
         exit_text = "Exit"
     else:
         message = "An update is available, do you want to download it?"
         title = "Update available"
-        download_disabled = False
+        download_enabled = True
         exit_text = "No"
 
     window['-INFO-'].update(message)
     window.set_title(title)
-    window['-DOWNLOAD-'].update(disabled=download_disabled)
+    window['-DOWNLOAD-'].update(visible=download_enabled)
     window['-EXIT-'].update(exit_text)
 
     while True:
