@@ -17,7 +17,10 @@ logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
 
 
 def about_window():
-    layout = [[sg.Push(), sg.T(str(WINDOW_TITLE), font=(FONT_FAMILY, 12, "bold")), sg.Push()],
+    layout = [[sg.T(s=40)],
+              [sg.Push(), sg.T(str(WINDOW_TITLE), font=(FONT_FAMILY, 12, "bold")), sg.Push()],
+              [sg.Push(), sg.T("Prevent your PC from sleeping with - 'Don't sleep' \nor X-Sleep for short.",
+                               font=(FONT_FAMILY, 9, "italic"), justification='c', text_color='grey'), sg.Push()],
               [sg.T()],
               [sg.Push(), sg.T(github_url['name'], enable_events=True, font=(FONT_FAMILY, 10, "underline"),
                                justification='l', text_color='#0066CC',
@@ -43,8 +46,7 @@ def about_window():
 def new_version_check(c_release, c_release_name, l_release, l_release_name, down_url):
     global update_check
     layout = [[sg.T(s=40)],
-              [sg.T(font=(FONT_FAMILY, 10),
-                    justification='l', key="-INFO-")],
+              [sg.T(font=(FONT_FAMILY, 10), justification='l', key="-INFO-")],
               [sg.T()],
               [sg.T('Current Version is  :', justification='l', font=(FONT_FAMILY, 10)),
                sg.T(f'{c_release_name}', font=(FONT_FAMILY, 10))],
@@ -238,7 +240,7 @@ if __name__ == '__main__':
     if sys.platform.startswith('win'):
         multiprocess.freeze_support()
 
-    RELEASE_NAME = '2.0.0'
+    RELEASE_NAME = '2.0.1'
     RELEASE = int(''.join(filter(str.isdigit, RELEASE_NAME)))
     WINDOW_TITLE = "X-Sleep"
     FONT_FAMILY = "Arial"
