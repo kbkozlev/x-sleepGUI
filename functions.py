@@ -87,15 +87,22 @@ def countdown(hours, minutes, seconds, window, event: Event, bgp):
 def get_latest_version():
     try:
         response = requests.get("https://api.github.com/repos/kbkozlev/x-sleepGUI/releases/latest")
-        latest_release = response.json()['tag_name']
-        download_url = response.json()['html_url']
+        response_data = response.json()
+        latest_release_name = response_data.get('tag_name')
+        download_url = response_data.get('html_url')
+
+        if latest_release_name:
+            latest_release = int(''.join(filter(str.isdigit, latest_release_name)))
+        else:
+            latest_release = None
 
     except Exception as e:
         logging.error(e)
-        latest_release = None
+        latest_release_name = None
         download_url = None
+        latest_release = None
 
-    return latest_release, download_url
+    return latest_release, latest_release_name, download_url
 
 
 def create_process(args, *kwargs):

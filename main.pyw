@@ -1,5 +1,4 @@
 import time
-import re
 import sys
 import multiprocess
 import webbrowser
@@ -41,21 +40,44 @@ def about_window():
                 window.close()
 
 
-def new_version(current_release, latest_release, download_url):
+def new_version_check(c_release, c_release_name, l_release, l_release_name, down_url):
     global update_check
-    layout = [[sg.Push(), sg.T('New Version Available', font=(FONT_FAMILY, 12, 'bold'), justification='c'), sg.Push()],
-              [sg.T(s=30)],
-              [sg.T('Current Version:', s=13, justification='r'), sg.T(f'{current_release}',
-                                                                       font=(FONT_FAMILY, 10, 'bold'))],
-              [sg.T(f'Latest Version:', s=13, justification='r'), sg.T(f'{latest_release}',
-                                                                       font=(FONT_FAMILY, 10, 'bold'))],
+    layout = [[sg.T(s=40)],
+              [sg.T(font=(FONT_FAMILY, 10),
+                    justification='l', key="-INFO-")],
               [sg.T()],
-              [sg.Push(), sg.B('Download', key='-DOWNLOAD-', s=8, button_color='#93b7a6'), sg.B('Cancel',
-                                                                                                key='-EXIT-', s=8,
-                                                                                                button_color='#db5656'),
+              [sg.T('Current Version is  :', justification='l', font=(FONT_FAMILY, 10)),
+               sg.T(f'{c_release_name}', font=(FONT_FAMILY, 10))],
+              [sg.T('Available Version is:', justification='l', font=(FONT_FAMILY, 10)),
+               sg.T(f'{l_release_name}', font=(FONT_FAMILY, 10))],
+              [sg.T()],
+              [sg.Push(),
+               sg.B('Yes', key='-DOWNLOAD-', s=8, button_color='#93b7a6', disabled_button_color='light grey'),
+               sg.B(key='-EXIT-', s=8, button_color='#db5656'),
                sg.Push()]]
 
-    window = sg.Window("New Version Available", layout, icon=ICON, keep_on_top=True)
+    window = sg.Window("Update Available", layout, icon=ICON, keep_on_top=True, finalize=True)
+
+    if l_release is None:
+        message = "Cannot fetch version data! \nPlease check your network connection."
+        title = "Error"
+        download_disabled = True
+        exit_text = "Exit"
+    elif l_release <= c_release:
+        message = "You have the latest version!"
+        title = "No update available"
+        download_disabled = True
+        exit_text = "Exit"
+    else:
+        message = "An update is available, do you want to download it?"
+        title = "Update available"
+        download_disabled = False
+        exit_text = "No"
+
+    window['-INFO-'].update(message)
+    window.set_title(title)
+    window['-DOWNLOAD-'].update(disabled=download_disabled)
+    window['-EXIT-'].update(exit_text)
 
     while True:
         event, values = window.read()
@@ -65,13 +87,8 @@ def new_version(current_release, latest_release, download_url):
                 break
 
             case '-DOWNLOAD-':
-                if latest_release is not None:
-                    current_release = re.sub(r'[^0-9]', '', current_release)
-                    latest_release = re.sub(r'[^0-9]', '', latest_release)
-
-                    if int(latest_release) > int(current_release):
-                        webbrowser.open(download_url)
-                        window.close()
+                webbrowser.open(down_url)
+                window.close()
 
             case '-EXIT-':
                 window.close()
@@ -79,48 +96,8 @@ def new_version(current_release, latest_release, download_url):
     update_check = False
 
 
-def updates_window(current_release):
-    latest_release, download_url = get_latest_version()
-    layout = [[sg.Push(), sg.T('Version Info', font=(FONT_FAMILY, 12, 'bold'), justification='c'), sg.Push()],
-              [sg.T(s=30)],
-              [sg.T('Current Version:', s=13, justification='r'), sg.T(f'{current_release}',
-                                                                       font=(FONT_FAMILY, 10, 'bold'))],
-              [sg.T(f'Latest Version:', s=13, justification='r'), sg.T(f'{latest_release}',
-                                                                       font=(FONT_FAMILY, 10, 'bold'))],
-              [sg.Push(), sg.T(justification="c", key="-INFO-"), sg.Push()],
-              [sg.Push(), sg.B('Download', key='-DOWNLOAD-', s=8, button_color='#93b7a6'), sg.Push()]]
-
-    window = sg.Window("Check for Updates", layout, icon=ICON)
-
-    while True:
-        event, values = window.read()
-
-        match event:
-            case sg.WIN_CLOSED:
-                break
-
-            case '-DOWNLOAD-':
-                if latest_release is not None:
-                    current_release = re.sub(r'[^0-9]', '', current_release)
-                    latest_release = re.sub(r'[^0-9]', '', latest_release)
-
-                    if int(latest_release) > int(current_release):
-                        webbrowser.open(download_url)
-                        window.close()
-
-                    else:
-                        window['-INFO-'].update("You have the latest version", text_color='green')
-
-                else:
-                    window['-INFO-'].update("Cannot fetch version data", text_color='red')
-
-        window.refresh()
-        time.sleep(1)
-        window["-INFO-"].update(" ")
-
-
 def main_window():
-    global hot_key, bgp, update_check
+    global hot_key, update_check, bgp
 
     app_menu = [['Help', ['About', 'Check for Updates']]]
 
@@ -163,7 +140,7 @@ def main_window():
         event, values = window.read(timeout=10)
 
         if update_check:
-            new_version(RELEASE, latest_release_name, download_url)
+            new_version_check(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
 
         keyboard.add_hotkey(hot_key, lambda: graceful_exit(thread_event, window, pag))
 
@@ -252,7 +229,7 @@ def main_window():
             about_window()
 
         if event == 'Check for Updates':
-            updates_window(RELEASE)
+            new_version_check(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
 
     graceful_exit(thread_event, window, pag)
 
@@ -261,7 +238,8 @@ if __name__ == '__main__':
     if sys.platform.startswith('win'):
         multiprocess.freeze_support()
 
-    RELEASE = '2.0.0'
+    RELEASE_NAME = '1.0.0'
+    RELEASE = int(''.join(filter(str.isdigit, RELEASE_NAME)))
     WINDOW_TITLE = "X-Sleep"
     FONT_FAMILY = "Arial"
     HOURS = [f" {i:02}" for i in range(24)]
@@ -280,15 +258,10 @@ if __name__ == '__main__':
     conf.create_on_start()
     hot_key = get_hotkey(conf)
     update_check = False
+    bgp = None
 
-    try:
-        latest_release_name, download_url = get_latest_version()
-        if latest_release_name is not None:
-            current_release = re.sub(r'[^0-9]', '', RELEASE)
-            latest_release = re.sub(r'[^0-9]', '', latest_release_name)
-            if int(latest_release) > int(current_release):
-                update_check = True
-    except Exception as e:
-        logging.error(e)
+    latest_release, latest_release_name, download_url = get_latest_version()
+    if latest_release is not None and latest_release > RELEASE:
+        update_check = True
 
     main_window()
