@@ -238,7 +238,7 @@ if __name__ == '__main__':
     if sys.platform.startswith('win'):
         multiprocess.freeze_support()
 
-    RELEASE_NAME = '1.0.0'
+    RELEASE_NAME = '2.0.0'
     RELEASE = int(''.join(filter(str.isdigit, RELEASE_NAME)))
     WINDOW_TITLE = "X-Sleep"
     FONT_FAMILY = "Arial"
