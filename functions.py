@@ -23,15 +23,17 @@ def correct_key(text: str):
         if key not in keys_list:
             not_valid.append(key)
 
-    return not_valid, ' + '.join(keys)
+    valid_keys = ' + '.join(keys)
+
+    return not_valid, valid_keys
 
 
 def get_hotkey(conf):
     if conf.get_value('hot_key_state'):
-        hot_hey = conf.get_value('cust_hot_key')
+        hot_key = conf.get_value('cust_hot_key')
     else:
-        hot_hey = conf.get_value('def_hot_key')
-    return hot_hey
+        hot_key = conf.get_value('def_hot_key')
+    return hot_key
 
 
 def is_capslock_on(pag):
