@@ -1,7 +1,7 @@
 import json
 import logging
 
-logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
+logging.basicConfig(filename='../misc/errors.log', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s | %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 
 
@@ -17,7 +17,7 @@ class Configurator:
 
     def read_config_file(self, config_file_name: str = "config.json"):
         try:
-            with open(config_file_name) as conf_file:
+            with open('config/' + config_file_name) as conf_file:
                 data = json.load(conf_file)
                 for key, value in data.items():
                     setattr(self, key, value)
@@ -27,7 +27,7 @@ class Configurator:
     def save_config_file(self, config_file_name: str = "config.json"):
         try:
             conf_items = {k: v for k, v in vars(self).items() if isinstance(v, (int, float, str, bool, list, dict))}
-            with open(config_file_name, "w") as conf_file:
+            with open('config/' + config_file_name, "w") as conf_file:
                 json.dump(conf_items, conf_file, sort_keys=False, indent=2)
         except Exception as e:
             logging.error(f"{str(e)} \n- Error occurred while saving: {config_file_name}")

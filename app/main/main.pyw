@@ -6,13 +6,14 @@ import PySimpleGUI as sg
 import pyautogui as pag
 import keyboard
 import logging
-from functions import (get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key,
-                       is_capslock_on, terminate)
+from app.main.func.functions import (get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key,
+                                     is_capslock_on, terminate)
 from threading import Thread, Event
-from mouse_jiggler import jiggler
-from configurator import Configurator
+from app.main.func.mouse_jiggler import jiggler
+from app.main.config.configurator import Configurator
+from tendo import singleton
 
-logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
+logging.basicConfig(filename='misc/errors.log', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s | %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 
 
@@ -101,7 +102,7 @@ def new_version_check(c_release, c_release_name, l_release, l_release_name, down
 def main_window():
     global hot_key, update_check, bgp
 
-    app_menu = [['Help', ['About', 'Check for Updates']]]
+    app_menu = [['Help', ['About', 'Check for Updates']], ['Language', ['Test']]]
 
     layout = [[sg.Menubar(app_menu)],
               [sg.Frame('Hotkey',
@@ -239,6 +240,12 @@ def main_window():
 if __name__ == '__main__':
     if sys.platform.startswith('win'):
         multiprocess.freeze_support()
+
+    try:
+        single_instance = singleton.SingleInstance()  # will sys.exit(-1) if other instance is running
+
+    finally:
+        del single_instance
 
     RELEASE_NAME = '2.0.1'
     RELEASE = int(''.join(filter(str.isdigit, RELEASE_NAME)))

@@ -23,9 +23,9 @@ You can download the latest <a href="https://github.com/kbkozlev/x-sleepGUI/rele
 ```
      curl -LO https://github.com/kbkozlev/x-sleepGUI/archive/refs/heads/master.tar.gz
      tar -xf master.tar.gz
-     cd x-sleepGUI-master
+     cd x-sleepGUI-master/app
      pip install -r requirements.txt
-     python main.pyw     
+     python main/main.pyw     
 ```
 
 # Support Me
