@@ -241,7 +241,7 @@ if __name__ == '__main__':
         multiprocess.freeze_support()
 
     RELEASE_NAME = '2.0.1'
-    RELEASE = int(''.join(filter(str.isdigit, RELEASE_NAME)))
+    RELEASE = int(''.join(filter(lambda x: x.isdigit(), RELEASE_NAME)))
     WINDOW_TITLE = "X-Sleep"
     FONT_FAMILY = "Arial"
     HOURS = [f" {i:02}" for i in range(24)]
