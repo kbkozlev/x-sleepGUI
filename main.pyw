@@ -185,6 +185,7 @@ def main_window():
             window['-APPLY-'].update(button_color='#93b7a6')
 
         else:
+            window['-HT_KEY-'].update(hot_key)
             window['-HT_KEY-'].update(disabled=True)
             window['-HT_KEY-'].update(text_color='grey')
             window['-APPLY-'].update(disabled=True)
@@ -195,7 +196,6 @@ def main_window():
                 conf.hot_key_state = True
                 hot_key = conf.cust_hot_key = format_str
                 conf.save_config_file()
-                window['-HT_KEY-'].update(format_str)
                 window['-CHANGE-'].update(False)
             else:
                 window['-LOG-'].update(
