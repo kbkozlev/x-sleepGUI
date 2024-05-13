@@ -6,13 +6,13 @@ import PySimpleGUI as sg
 import pyautogui as pag
 import keyboard
 import logging
-from functions import (get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key,
-                       is_capslock_on, terminate)
+from app.settings.helpers.functions import (get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key,
+                                            is_capslock_on, terminate)
 from threading import Thread, Event
-from mouse_jiggler import jiggler
-from configurator import Configurator
+from app.settings.helpers.mouse_jiggler import jiggler
+from app.settings.helpers.configurator import Configurator
 
-logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.INFO,
+logging.basicConfig(filename='app/settings/helpers/log.log', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s | %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 
 
@@ -247,7 +247,7 @@ if __name__ == '__main__':
     HOURS = [f" {i:02}" for i in range(24)]
     MINUTES = [f" {i:02}" for i in range(60)]
     SECONDS = [f" {i:02}" for i in range(60)]
-    ICON = 'media/x-sleep.ico'
+    ICON = 'app/media/x-sleep.ico'
 
     github_url = {'name': 'Official GitHub Page',
                   'url': 'https://github.com/kbkozlev/x-sleepGUI'}
