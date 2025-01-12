@@ -1,13 +1,13 @@
 import time
-import sys
 import multiprocess
 import webbrowser
-import PySimpleGUI as sg
+import PySimpleGUI as Sg
 import pyautogui as pag
 import keyboard
 import logging
-from app.settings.helpers.functions import (get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key,
-                                            is_capslock_on, terminate)
+from app.settings.helpers.functions import (get_latest_version, create_process, countdown, graceful_exit, get_hotkey,
+                                            correct_key,
+                                            is_capslock_on, terminate, os_check)
 from threading import Thread, Event
 from app.settings.helpers.mouse_jiggler import jiggler
 from app.settings.helpers.configurator import Configurator
@@ -17,48 +17,49 @@ logging.basicConfig(filename='app/settings/helpers/log.log', encoding='utf-8', l
 
 
 def about_window():
-    layout = [[sg.T(s=40)],
-              [sg.Push(), sg.T(str(WINDOW_TITLE), font=(FONT_FAMILY, 12, "bold")), sg.Push()],
-              [sg.Push(), sg.T("Prevent your PC from sleeping with - 'Don't sleep' \nor X-Sleep for short.",
-                               font=(FONT_FAMILY, 9, "italic"), justification='c', text_color='grey'), sg.Push()],
-              [sg.T()],
-              [sg.Push(), sg.T(github_url['name'], enable_events=True, font=(FONT_FAMILY, 10, "underline"),
+    layout = [[Sg.T(s=40)],
+              [Sg.Push(), Sg.T(str(WINDOW_TITLE), font=(FONT_FAMILY, 12, "bold")), Sg.Push()],
+              [Sg.Push(), Sg.T("Prevent your PC from sleeping with - 'Don't sleep' \nor X-Sleep for short.",
+                               font=(FONT_FAMILY, 9, "italic"), justification='c', text_color='grey'), Sg.Push()],
+              [Sg.T()],
+              [Sg.Push(), Sg.T(github_url['name'], enable_events=True, font=(FONT_FAMILY, 10, "underline"),
                                justification='l', text_color='#0066CC',
-                               auto_size_text=True, key='-LINK-'), sg.Push()],
-              [sg.Push(), sg.T("License: GPL-3.0", justification='c'), sg.Push()],
-              [sg.T()],
-              [sg.Push(), sg.T("Copyright © 2023 Kaloian Kozlev", text_color='light grey'), sg.Push()]]
+                               auto_size_text=True, key='-LINK-'), Sg.Push()],
+              [Sg.Push(), Sg.T("License: GPL-3.0", justification='c'), Sg.Push()],
+              [Sg.T()],
+              [Sg.Push(), Sg.T("Copyright © 2023 Kaloian Kozlev", text_color='light grey'), Sg.Push()]]
 
-    window = sg.Window("About", layout, icon=ICON)
+    window = Sg.Window("About", layout, icon=ICON)
 
     while True:
         event, values = window.read()
 
         match event:
-            case sg.WIN_CLOSED:
+            case Sg.WIN_CLOSED:
                 break
 
             case '-LINK-':
                 webbrowser.open(github_url['url'])
                 window.close()
+                break
 
 
-def new_version_check(c_release, c_release_name, l_release, l_release_name, down_url):
+def new_version_window(c_release, c_release_name, l_release, l_release_name, down_url):
     global update_check
-    layout = [[sg.T(s=40)],
-              [sg.T(font=(FONT_FAMILY, 10), justification='l', key="-INFO-")],
-              [sg.T()],
-              [sg.T('Current Version is  :', justification='l', font=(FONT_FAMILY, 10)),
-               sg.T(f'{c_release_name}', font=(FONT_FAMILY, 10))],
-              [sg.T('Available Version is:', justification='l', font=(FONT_FAMILY, 10)),
-               sg.T(f'{l_release_name}', font=(FONT_FAMILY, 10))],
-              [sg.T()],
-              [sg.Push(),
-               sg.B('Yes', key='-DOWNLOAD-', s=8, button_color='#93b7a6'),
-               sg.B(key='-EXIT-', s=8, button_color='#db5656'),
-               sg.Push()]]
+    layout = [[Sg.T(s=40)],
+              [Sg.T(font=(FONT_FAMILY, 10), justification='l', key="-INFO-")],
+              [Sg.T()],
+              [Sg.T('Current Version is  :', justification='l', font=(FONT_FAMILY, 10)),
+               Sg.T(f'{c_release_name}', font=(FONT_FAMILY, 10))],
+              [Sg.T('Available Version is:', justification='l', font=(FONT_FAMILY, 10)),
+               Sg.T(f'{l_release_name}', font=(FONT_FAMILY, 10))],
+              [Sg.T()],
+              [Sg.Push(),
+               Sg.B('Yes', key='-DOWNLOAD-', s=8, button_color='#93b7a6'),
+               Sg.B(key='-EXIT-', s=8, button_color='#db5656'),
+               Sg.Push()]]
 
-    window = sg.Window("Update Available", layout, icon=ICON, keep_on_top=True, finalize=True)
+    window = Sg.Window("Update Available", layout, icon=ICON, keep_on_top=True, finalize=True)
 
     if l_release is None:
         message = "Cannot fetch version data! \nPlease check your network connection."
@@ -85,7 +86,7 @@ def new_version_check(c_release, c_release_name, l_release, l_release_name, down
         event, values = window.read()
 
         match event:
-            case sg.WIN_CLOSED:
+            case Sg.WIN_CLOSED:
                 break
 
             case '-DOWNLOAD-':
@@ -103,50 +104,54 @@ def main_window():
 
     app_menu = [['Help', ['About', 'Check for Updates']]]
 
-    layout = [[sg.Menubar(app_menu)],
-              [sg.Frame('Hotkey',
-                        [[sg.I(disabled=True, default_text=hot_key, justification='c',
+    layout = [[Sg.Menubar(app_menu)],
+              [Sg.Frame('Hotkey',
+                        [[Sg.I(disabled=True, default_text=hot_key, justification='c',
                                disabled_readonly_text_color='grey', disabled_readonly_background_color='#dae0e6',
                                key='-HT_KEY-', tooltip="ALT, CTRL, SHIFT, WINDOWS, A-Z, 0-9, F1-F12")],
-                         [sg.Checkbox('Change', key='-CHANGE-', enable_events=True), sg.Push(),
-                          sg.B('Reset', size=8, key='-RESET-'),
-                          sg.B('Apply', size=8, disabled=True, disabled_button_color='light grey', key='-APPLY-')]
+                         [Sg.Checkbox('Change', key='-CHANGE-', enable_events=True, disabled=True), Sg.Push(),
+                          Sg.B('Reset', size=8, key='-RESET-', disabled_button_color='light grey', disabled=True),
+                          Sg.B('Apply', size=8, disabled=True, disabled_button_color='light grey', key='-APPLY-')]
                          ], expand_x=True)],
-              [sg.Frame('Timer',
-                        [[sg.T('Hours:'), sg.DropDown(HOURS, default_value=' 00', key='-H-', disabled=True,
+              [Sg.Frame('Timer',
+                        [[Sg.T('Hours:'), Sg.DropDown(HOURS, default_value=' 00', key='-H-', disabled=True,
                                                       readonly=True, button_background_color='#93b7a6', s=(3, 1)),
-                          sg.T('Minutes:'), sg.DropDown(MINUTES, default_value=' 00', key='-M-', disabled=True,
+                          Sg.T('Minutes:'), Sg.DropDown(MINUTES, default_value=' 00', key='-M-', disabled=True,
                                                         readonly=True, button_background_color='#93b7a6', s=(3, 1)),
-                          sg.T('Seconds:'), sg.DropDown(SECONDS, default_value=' 00', key='-S-', disabled=True,
+                          Sg.T('Seconds:'), Sg.DropDown(SECONDS, default_value=' 00', key='-S-', disabled=True,
                                                         readonly=True, button_background_color='#93b7a6', s=(3, 1))
                           ],
-                         [sg.Radio('Off', 'timer', default=True, enable_events=True, key='-OFF-'),
-                          sg.Radio('On', 'timer', enable_events=True, key='-ON-'), sg.Push(),
-                          sg.I(background_color='#dae0e6', size=8, key='-LOG_TIME-', justification='c',
+                         [Sg.Radio('Off', 'timer', default=True, enable_events=True, key='-OFF-'),
+                          Sg.Radio('On', 'timer', enable_events=True, key='-ON-'), Sg.Push(),
+                          Sg.I(background_color='#dae0e6', size=8, key='-LOG_TIME-', justification='c',
                                default_text='00:00:00', disabled=True, disabled_readonly_text_color='grey',
                                disabled_readonly_background_color='#dae0e6', readonly=True)]
                          ], expand_x=True)],
-              [sg.Frame('Log',
-                        [[sg.Input(background_color='#dae0e6', size=45, key='-LOG-', justification='c',
+              [Sg.Frame('Log',
+                        [[Sg.Input(background_color='#dae0e6', size=45, key='-LOG-', justification='c',
                                    text_color='white')]], expand_x=True)],
-              [sg.Button('Start', size=8, button_color='#93b7a6', disabled_button_color='light grey',
+              [Sg.Button('Start', size=8, button_color='#93b7a6', disabled_button_color='light grey',
                          key='-START-'),
-               sg.Button('Stop', size=8, button_color='#ffcf61', disabled=True,
+               Sg.Button('Stop', size=8, button_color='#ffcf61', disabled=True,
                          disabled_button_color='light grey', key='-STOP-'),
-               sg.Button('Exit', size=8, button_color='#db5656')]
+               Sg.Button('Exit', size=8, button_color='#db5656')]
               ]
 
-    window = sg.Window(WINDOW_TITLE, layout, keep_on_top=False)
+    window = Sg.Window(WINDOW_TITLE, layout, keep_on_top=False)
+
+    if update_check:
+        new_version_window(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
 
     while True:
         event, values = window.read(timeout=10)
 
-        if update_check:
-            new_version_check(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
+        if hot_key_active:
+            window['-CHANGE-'].update(disabled=False)
+            window['-RESET-'].update(disabled=False)
 
-        keyboard.add_hotkey(hot_key, lambda: graceful_exit(thread_event, window, pag))
+            keyboard.add_hotkey(hot_key, lambda: graceful_exit(thread_event, window, pag))
 
-        if event in ('Exit', sg.WIN_CLOSED):
+        if event in ('Exit', Sg.WIN_CLOSED):
             break
 
         if event == '-START-':
@@ -169,7 +174,7 @@ def main_window():
             window['-LOG-'].update('Application running', background_color='#5fad65')
 
         elif event == '-STOP-':
-            is_capslock_on(pag)
+            is_capslock_on(pag, os_name=os_name)
 
             if values['-ON-'] and values['-LOG_TIME-'] != '00:00:00':
                 thread_event.set()
@@ -231,16 +236,28 @@ def main_window():
             about_window()
 
         if event == 'Check for Updates':
-            new_version_check(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
+            new_version_window(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
 
     graceful_exit(thread_event, window, pag)
 
 
 if __name__ == '__main__':
-    if sys.platform.startswith('win'):
-        multiprocess.freeze_support()
+    hot_key_active = False
+    thread_event = Event()
+    conf = Configurator()
+    conf.create_on_start()
+    hot_key = get_hotkey(conf)
+    update_check = False
+    bgp = None
+    os_name = os_check()
 
-    RELEASE_NAME = '2.0.2'
+    if os_name == "windows":
+        multiprocess.freeze_support()
+        hot_key_active = True
+    else:
+        hot_key = 'Not Supported on this platform'
+
+    RELEASE_NAME = '3.0.0'
     RELEASE = int(''.join(filter(lambda x: x.isdigit(), RELEASE_NAME)))
     WINDOW_TITLE = "X-Sleep"
     FONT_FAMILY = "Arial"
@@ -252,15 +269,8 @@ if __name__ == '__main__':
     github_url = {'name': 'Official GitHub Page',
                   'url': 'https://github.com/kbkozlev/x-sleepGUI'}
 
-    sg.theme("Reddit")
-    sg.set_options(force_modal_windows=True, dpi_awareness=True, use_ttk_buttons=True, icon=ICON)
-
-    thread_event = Event()
-    conf = Configurator()
-    conf.create_on_start()
-    hot_key = get_hotkey(conf)
-    update_check = False
-    bgp = None
+    Sg.theme("Reddit")
+    Sg.set_options(force_modal_windows=True, dpi_awareness=True, use_ttk_buttons=True, icon=ICON)
 
     latest_release, latest_release_name, download_url = get_latest_version()
     if latest_release is not None and latest_release > RELEASE:

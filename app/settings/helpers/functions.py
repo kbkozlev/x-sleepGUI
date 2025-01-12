@@ -2,13 +2,13 @@ import requests
 import logging
 import ctypes
 import time
+import os
 from threading import Event
 from multiprocess import Process
-
+import subprocess
 
 logging.basicConfig(filename='./app/settings/log.log', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s | %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
-
 
 keys_list = ['ALT', 'CTRL', 'SHIFT', 'WINDOWS',
              'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -37,9 +37,23 @@ def get_hotkey(conf):
     return hot_key
 
 
-def is_capslock_on(pag):
-    if ctypes.WinDLL("User32.dll").GetKeyState(0x14):
-        pag.press('capslock')
+def is_capslock_on(pag, os_name):
+    capslock_state = False
+    try:
+        if os_name == "windows":
+            capslock_state = ctypes.WinDLL("User32.dll").GetKeyState(0x14) & 1
+        elif os_name == "linux":
+            output = subprocess.run(['xset', 'q'], capture_output=True, text=True, check=True).stdout
+            if "Caps Lock:   on" in output:
+                capslock_state = True
+        else:
+            raise NotImplementedError("Unsupported platform")
+
+        if capslock_state:
+            pag.press('capslock')
+
+    except Exception as e:
+        logging.error(e)
 
 
 def graceful_exit(event, window, pag):
@@ -48,7 +62,8 @@ def graceful_exit(event, window, pag):
     except Exception as e:
         logging.error(e)
     finally:
-        is_capslock_on(pag)
+        os_name = os_check()
+        is_capslock_on(pag,os_name=os_name)
         window.write_event_value('Exit', True)
 
 
@@ -110,3 +125,12 @@ def get_latest_version():
 
 def create_process(args, *kwargs):
     return Process(target=args, args=kwargs)
+
+
+def os_check():
+    if os.name == 'nt':
+        return "windows"
+    elif os.name == 'posix':
+        return "linux"
+    else:
+        return "unknown"
