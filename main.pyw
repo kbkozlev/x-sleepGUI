@@ -137,7 +137,11 @@ def main_window():
                Sg.Button('Exit', size=8, button_color='#db5656')]
               ]
 
-    window = Sg.Window(WINDOW_TITLE, layout, keep_on_top=False)
+    window = Sg.Window(WINDOW_TITLE, layout, keep_on_top=False, finalize=True)
+
+    if os_name == "windows":
+        window['-CHANGE-'].update(disabled=False)
+        window['-RESET-'].update(disabled=False)
 
     if update_check:
         new_version_window(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
@@ -146,9 +150,6 @@ def main_window():
         event, values = window.read(timeout=10)
 
         if hot_key_active:
-            window['-CHANGE-'].update(disabled=False)
-            window['-RESET-'].update(disabled=False)
-
             keyboard.add_hotkey(hot_key, lambda: graceful_exit(thread_event, window, pag))
 
         if event in ('Exit', Sg.WIN_CLOSED):
