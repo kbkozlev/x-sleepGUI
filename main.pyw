@@ -43,7 +43,7 @@ def about_window():
                 break
 
 
-def new_version_check(c_release, c_release_name, l_release, l_release_name, down_url):
+def new_version_window(c_release, c_release_name, l_release, l_release_name, down_url):
     global update_check
     layout = [[Sg.T(s=40)],
               [Sg.T(font=(FONT_FAMILY, 10), justification='l', key="-INFO-")],
@@ -108,8 +108,8 @@ def main_window():
                         [[Sg.I(disabled=True, default_text=hot_key, justification='c',
                                disabled_readonly_text_color='grey', disabled_readonly_background_color='#dae0e6',
                                key='-HT_KEY-', tooltip="ALT, CTRL, SHIFT, WINDOWS, A-Z, 0-9, F1-F12")],
-                         [Sg.Checkbox('Change', key='-CHANGE-', enable_events=True), Sg.Push(),
-                          Sg.B('Reset', size=8, key='-RESET-', disabled_button_color='light grey'),
+                         [Sg.Checkbox('Change', key='-CHANGE-', enable_events=True, disabled=True), Sg.Push(),
+                          Sg.B('Reset', size=8, key='-RESET-', disabled_button_color='light grey', disabled=True),
                           Sg.B('Apply', size=8, disabled=True, disabled_button_color='light grey', key='-APPLY-')]
                          ], expand_x=True)],
               [Sg.Frame('Timer',
@@ -138,18 +138,19 @@ def main_window():
 
     window = Sg.Window(WINDOW_TITLE, layout, keep_on_top=False)
 
+
+    if update_check:
+        new_version_window(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
+
+
     while True:
         event, values = window.read(timeout=10)
 
-        if update_check:
-            new_version_check(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
+        if hot_key_active:
+            window['-CHANGE-'].update(disabled=False)
+            window['-RESET-'].update(disabled=False)
 
-        if os_name == "windows":
             keyboard.add_hotkey(hot_key, lambda: graceful_exit(thread_event, window, pag))
-        else:
-            hot_key = 'Not Supported on this platform'
-            window['-CHANGE-'].update(disabled=True)
-            window['-RESET-'].update(disabled=True)
 
         if event in ('Exit', Sg.WIN_CLOSED):
             break
@@ -236,18 +237,29 @@ def main_window():
             about_window()
 
         if event == 'Check for Updates':
-            new_version_check(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
+            new_version_window(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
 
     graceful_exit(thread_event, window, pag)
 
 
 if __name__ == '__main__':
+    hot_key_active = False
+    thread_event = Event()
+    conf = Configurator()
+    conf.create_on_start()
+    hot_key = get_hotkey(conf)
+    update_check = False
+    bgp = None
     os_name = os_check()
 
     if os_name == "windows":
         multiprocess.freeze_support()
+        hot_key_active = True
+    else:
+        hot_key = 'Not Supported on this platform'
 
-    RELEASE_NAME = '3.0.0'
+
+    RELEASE_NAME = '2.0.0'
     RELEASE = int(''.join(filter(lambda x: x.isdigit(), RELEASE_NAME)))
     WINDOW_TITLE = "X-Sleep"
     FONT_FAMILY = "Arial"
@@ -261,13 +273,6 @@ if __name__ == '__main__':
 
     Sg.theme("Reddit")
     Sg.set_options(force_modal_windows=True, dpi_awareness=True, use_ttk_buttons=True, icon=ICON)
-
-    thread_event = Event()
-    conf = Configurator()
-    conf.create_on_start()
-    hot_key = get_hotkey(conf)
-    update_check = False
-    bgp = None
 
     latest_release, latest_release_name, download_url = get_latest_version()
     if latest_release is not None and latest_release > RELEASE:
