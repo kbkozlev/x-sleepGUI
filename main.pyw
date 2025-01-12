@@ -5,7 +5,8 @@ import PySimpleGUI as Sg
 import pyautogui as pag
 import keyboard
 import logging
-from app.settings.helpers.functions import (get_latest_version, create_process, countdown, graceful_exit, get_hotkey, correct_key,
+from app.settings.helpers.functions import (get_latest_version, create_process, countdown, graceful_exit, get_hotkey,
+                                            correct_key,
                                             is_capslock_on, terminate, os_check)
 from threading import Thread, Event
 from app.settings.helpers.mouse_jiggler import jiggler
@@ -138,10 +139,8 @@ def main_window():
 
     window = Sg.Window(WINDOW_TITLE, layout, keep_on_top=False)
 
-
     if update_check:
         new_version_window(RELEASE, RELEASE_NAME, latest_release, latest_release_name, download_url)
-
 
     while True:
         event, values = window.read(timeout=10)
@@ -258,8 +257,7 @@ if __name__ == '__main__':
     else:
         hot_key = 'Not Supported on this platform'
 
-
-    RELEASE_NAME = '2.0.0'
+    RELEASE_NAME = '3.0.0'
     RELEASE = int(''.join(filter(lambda x: x.isdigit(), RELEASE_NAME)))
     WINDOW_TITLE = "X-Sleep"
     FONT_FAMILY = "Arial"
