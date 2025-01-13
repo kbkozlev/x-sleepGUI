@@ -180,6 +180,9 @@ def main_window():
             if values['-ON-'] and values['-LOG_TIME-'] != '00:00:00':
                 thread_event.set()
 
+            if not hot_key_active: # Linux version has issue with Wayland protocol, where app cannot continue, so it quits the app instead.
+                break
+
             else:
                 terminate(window, bgp)
 
@@ -258,7 +261,7 @@ if __name__ == '__main__':
     else:
         hot_key = 'Not Supported on this platform'
 
-    RELEASE_NAME = '3.0.0'
+    RELEASE_NAME = '3.0.1'
     RELEASE = int(''.join(filter(lambda x: x.isdigit(), RELEASE_NAME)))
     WINDOW_TITLE = "X-Sleep"
     FONT_FAMILY = "Arial"
