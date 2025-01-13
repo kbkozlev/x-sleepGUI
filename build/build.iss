@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "X-Sleep"
-#define MyAppVersion "2.0.2"
+#define MyAppVersion "3.0.1"
 #define MyAppPublisher "Kaloian Kozlev"
 #define MyAppURL "https://github.com/kbkozlev/x-sleepGUI"
 #define MyAppExeName "X-Sleep.exe"
@@ -11,7 +11,7 @@
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{70BB0406-1161-4414-91EB-73885BC8F37C}
-AppName={#MyAppName}
+AppName={#MyAppName} 
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
@@ -26,7 +26,7 @@ LicenseFile=C:\Users\kbkoz\PycharmProjects\x-sleepGUI\LICENSE
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=C:\Users\kbkoz\PycharmProjects\x-sleepGUI\output
-OutputBaseFilename=X-Sleep Setup
+OutputBaseFilename=X-Sleep_setup_v.{#MyAppVersion}
 SetupIconFile=C:\Users\kbkoz\PycharmProjects\x-sleepGUI\output\X-Sleep\app\media\x-sleep.ico
 Compression=lzma
 SolidCompression=yes
