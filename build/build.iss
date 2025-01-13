@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "X-Sleep"
-#define MyAppVersion "2.0.2"
+#define MyAppVersion "3.0.1"
 #define MyAppPublisher "Kaloian Kozlev"
 #define MyAppURL "https://github.com/kbkozlev/x-sleepGUI"
 #define MyAppExeName "X-Sleep.exe"

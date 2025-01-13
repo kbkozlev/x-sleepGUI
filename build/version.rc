@@ -1,7 +1,7 @@
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(3, 0, 0, 0),
-    prodvers=(3, 0, 0, 0),
+    filevers=(3, 0, 1, 0),
+    prodvers=(3, 0, 1, 0),
     mask=0x3f,
     flags=0x0,
     OS=0x4,
@@ -20,8 +20,8 @@ VSVersionInfo(
         StringStruct('LegalCopyright', '© 2023 Kaloian Kozlev. All rights reserved.'),
         StringStruct('OriginalFilename', 'X-Sleep GUI.exe'),
         StringStruct('ProductName', 'X-Sleep GUI'),
-        StringStruct('ProductVersion', '3.0.0'),
-        StringStruct('FileVersion', '3.0.0'),
+        StringStruct('ProductVersion', '3.0.1'),
+        StringStruct('FileVersion', '3.0.1'),
         ]
       )
       ]
