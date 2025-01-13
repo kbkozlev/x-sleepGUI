@@ -180,6 +180,9 @@ def main_window():
             if values['-ON-'] and values['-LOG_TIME-'] != '00:00:00':
                 thread_event.set()
 
+            if not hot_key_active: # Linux version has issue with Wayland protocol, where app cannot continue, so it quits the app instead.
+                break
+
             else:
                 terminate(window, bgp)
 
