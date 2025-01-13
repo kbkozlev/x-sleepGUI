@@ -1,0 +1,12 @@
+Version: 3.0.0
+CompanyName: Kaloian Kozlev
+FileDescription: X-Sleep GUI / Mouse jiggler
+InternalName: X-Sleep GUI
+LegalCopyright: © 2023 Kaloian Kozlev. All rights reserved.
+OriginalFilename: X-Sleep GUI.exe
+ProductName: X-Sleep GUI
+Translation:
+  - langID: 0
+    charsetID: 1200
+  - langID: 1033
+    charsetID: 1252
